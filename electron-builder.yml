@@ -1,0 +1,52 @@
+appId: ch.resonlab.scenika
+productName: Scenika
+directories:
+  buildResources: build
+  output: release
+files:
+  - out/**/*
+  - build/icon.png
+  - package.json
+win:
+  icon: build/icon.png
+  target:
+    - target: nsis
+      arch:
+        - x64
+linux:
+  icon: build/icon.png
+  category: AudioVideo
+  # Un paquet Debian exige un mainteneur avec une adresse e-mail, sinon la
+  # construction du .deb echoue. Cette valeur est inscrite dans le paquet et
+  # visible de tous ceux qui le telechargent.
+  maintainer: ResonLab <resonlab@proton.me>
+  synopsis: Parc materiel son et lumiere
+  description: >-
+    Parc materiel son et lumiere, locations, calcul de puissance et adressage DMX. Toutes les donnees restent sur la machine.
+  desktop:
+    entry:
+      Name: Scenika
+      Comment: Parc son et lumiere, locations, DMX
+  target:
+    # AppImage : un seul fichier executable, sans installation, et le seul
+    # format Linux que l'auto-updater sait mettre a jour.
+    - target: AppImage
+      arch:
+        - x64
+    # deb : pour installer proprement sur Debian et Ubuntu (pas d'auto-update).
+    - target: deb
+      arch:
+        - x64
+publish:
+  - provider: github
+    owner: ResonLab
+    repo: scenika
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Scenika
+  uninstallDisplayName: Scenika
+  deleteAppDataOnUninstall: false
