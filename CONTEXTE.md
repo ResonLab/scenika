@@ -121,6 +121,60 @@ servir la page mobile plus tard sans rien réécrire.
 
 ---
 
+## Ce qui reste à faire — au 9 août 2026
+
+Par ordre de valeur. Les trois premiers points sont communs aux applications de
+la maison : **regarder comment Ohmnia les a résolus avant de recommencer**.
+
+### 1. Le site de l'application
+
+Dans la **même direction artistique** que `APP/docs/index.html` et
+`Site/index.html` : aurores animées en fond, révélation au défilement, boutons à
+balayage lumineux, barre de progression, bascule clair/sombre mémorisée,
+transitions de page. Une même maison doit se reconnaître d'un site à l'autre.
+Reprendre le CSS de `Site/index.html`, changer le dégradé.
+
+### 2. Français et anglais
+
+Les sites **et** l'application. Ohmnia a l'infrastructure dans
+`APP/src/shared/i18n.ts` : un objet `TEXTES`, une clé préfixée par écran, et
+`npm run typecheck` rejette les clés inconnues. **Reprendre ce mécanisme, pas en
+inventer un autre.** Les messages d'erreur du main process devront aussi y
+passer, ou être renvoyés sous forme de clé.
+
+### 3. Empaquetage Windows et Linux
+
+`.exe` (NSIS), AppImage et `.deb`. **Ohmnia a déjà tout** : `electron-builder.yml`
+et `.github/workflows/construire.yml`, qui construit les deux systèmes et dépose
+une release en brouillon sur une étiquette `v*`. Les recopier en changeant
+`appId`, `productName`, l'icône et le mainteneur.
+
+Deux pièges déjà payés sur Ohmnia :
+
+- **electron-builder ne sait pas produire un paquet Linux depuis Windows.** Il
+  faut GitHub Actions (ou WSL).
+- **Le `.deb` exige `fakeroot`**, absent des runners Ubuntu 24.04 : le workflow
+  l'installe explicitement, sinon la construction échoue en quelques secondes
+  alors que l'AppImage passe.
+
+L'icône doit être un PNG d'au moins 256×256 dans `build/icon.png`. Les PNG de la
+maison sont dans `Identite/png/`.
+
+### 4. Propre à Scenika
+
+- **Module Location** : qui a quoi, depuis quand, jusqu'à quand. Départs et
+  retours. C'est le module qui manque le plus au parc.
+- **Module Puissance** : répartition sur les circuits, à partir des watts déjà
+  saisis dans le parc. Le calculateur DMX en donne déjà le total.
+- **Export de lignes de facture vers Ohmnia** : une location se facture, et il
+  ne faut surtout pas refaire un module de facturation ici.
+- **Se brancher sur Nexika** : la couche métier est déjà sans Electron, c'est
+  fait pour. Regarder comment Ohmnia s'y prend (`APP/src/main/multipostes/`).
+- **La page web de consultation mobile**, servie par Nexika sur le réseau local.
+  Décidé, reporté : elle suppose un serveur qui tourne.
+
+---
+
 ## 4. Le calculateur DMX : deux versions, une seule formule
 
 Décidé, et le détail est dans [../LISEZ-MOI.md](../LISEZ-MOI.md) :
