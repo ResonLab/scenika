@@ -126,17 +126,46 @@ servir la page mobile plus tard sans rien réécrire.
 Par ordre de valeur. Les trois premiers points sont communs aux applications de
 la maison : **regarder comment Ohmnia les a résolus avant de recommencer**.
 
-### 1. Le site de l'application
+### 1. Le site de l'application — **fait**
 
-Dans la **même direction artistique** que `APP/docs/index.html` et
-`Site/index.html` : aurores animées en fond, révélation au défilement, boutons à
-balayage lumineux, barre de progression, bascule clair/sombre mémorisée,
-transitions de page. Une même maison doit se reconnaître d'un site à l'autre.
-Reprendre le CSS de `Site/index.html`, changer le dégradé.
+En ligne sur <https://resonlab.github.io/scenika/>, en français et en anglais
+(`docs/en/`). Même direction artistique que `Site/index.html`, dégradé ambre.
+La clé de thème `resonlab-theme` est **commune à tous les sites de la maison** :
+un choix clair/sombre vaut pour l'ensemble.
 
-### 2. Français et anglais
+**`site/` est devenu `docs/`** : GitHub Pages ne sert que la racine du dépôt ou
+`docs/`, pas un dossier au nom libre.
 
-Les sites **et** l'application. Ohmnia a l'infrastructure dans
+**Le piège trouvé en déplaçant, à ne pas réintroduire.** La page du calculateur
+importait `../commun/dmx.js`. Servie par Pages depuis `docs/`, elle remontait
+au-dessus de la racine servie : la page se serait affichée normalement et le
+calculateur aurait été mort. **En local, rien ne l'aurait montré**, puisque le
+dossier y est servi depuis la racine du dépôt.
+
+L'import vise maintenant `./commun/dmx.js`, et `npm run site:preparer` y dépose
+une copie. **La copie est ignorée par git** — la formule vit à un seul endroit,
+c'est la règle numéro un. `.github/workflows/site.yml` refait la copie à chaque
+publication, après avoir passé `tests/coherence-site.mjs`.
+
+**La page anglaise est fabriquée depuis la française par substitutions
+explicites**, CSS et JavaScript inchangés. `tests/coherence-site.mjs` compare
+les deux structures — sections, cartes, titres, boutons — et **refuse que le CSS
+diverge** : s'il diffère, c'est que la page traduite a été éditée à la main, et
+la prochaine génération l'écrasera. On ne peut pas comparer une traduction mot à
+mot ; on peut constater qu'une section a été ajoutée d'un seul côté.
+
+*Non vérifié : le calculateur n'a pas été exécuté dans un navigateur sur
+l'adresse publique — le domaine est bloqué depuis l'outil de navigation. Ce qui
+est vérifié, c'est que les pages répondent en 200 et que le module servi est
+identique octet pour octet à `commun/dmx.js`.*
+
+### 2. Français et anglais — le site est fait, **l'application non**
+
+Le site est bilingue (point 1). **L'application n'a rien** : pas de fichier
+`i18n.ts`, pas de sélecteur de langue, tout le texte des écrans en français en
+dur. C'est le chantier qui reste.
+
+Ohmnia a l'infrastructure dans
 `APP/src/shared/i18n.ts` : un objet `TEXTES`, une clé préfixée par écran, et
 `npm run typecheck` rejette les clés inconnues. **Reprendre ce mécanisme, pas en
 inventer un autre.** Les messages d'erreur du main process devront aussi y
