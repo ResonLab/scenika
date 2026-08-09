@@ -2,6 +2,8 @@
   "name": "scenika",
   "version": "0.1.0",
   "description": "Scenika - parc materiel son et lumiere, location, puissance, DMX",
+  "author": "Colin Meng",
+  "license": "MIT",
   "private": true,
   "type": "module",
   "scripts": {
