@@ -1,0 +1,236 @@
+/* Identité de Scenika : ambre → orange, sur fond sombre. */
+:root {
+  --ambre: #ffc961;
+  --orange: #f2751a;
+  --fond: #14110d;
+  --carte: #1e1a15;
+  --trait: #3a3227;
+  --texte: #f4efe6;
+  --discret: #a89b86;
+  --rouge: #ff6b5e;
+  --vert: #57d99a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--fond);
+  color: var(--texte);
+  font: 15px/1.5 system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+.app {
+  display: grid;
+  grid-template-columns: 15rem 1fr;
+  min-height: 100vh;
+}
+
+.menu {
+  background: #100e0a;
+  border-right: 1px solid var(--trait);
+  padding: 1rem 0.6rem;
+}
+
+.menu-entete {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0 0.5rem 1.2rem;
+}
+
+.menu-entete strong {
+  display: block;
+}
+
+.pastille {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--ambre), var(--orange));
+  flex: none;
+}
+
+.menu nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.menu nav button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: 7px;
+  color: var(--texte);
+  font: inherit;
+  padding: 0.5rem 0.6rem;
+  cursor: pointer;
+}
+
+.menu nav button:hover {
+  background: #191510;
+}
+
+.menu nav button.actif {
+  background: linear-gradient(90deg, rgba(255, 201, 97, 0.18), transparent);
+  box-shadow: inset 2px 0 0 var(--ambre);
+}
+
+.icone {
+  width: 1.3rem;
+}
+
+.contenu {
+  padding: 1.5rem 1.8rem 3rem;
+  overflow-x: hidden;
+}
+
+h1 {
+  font-size: 1.4rem;
+  margin: 0 0 1.2rem;
+}
+
+h2 {
+  font-size: 1rem;
+  margin: 0 0 0.8rem;
+}
+
+.carte {
+  background: var(--carte);
+  border: 1px solid var(--trait);
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1.1rem;
+}
+
+/* Un tableau large ne doit jamais couper le contenu : piège vécu sur Ohmnia. */
+.defilable {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.45rem 0.6rem;
+  border-bottom: 1px solid var(--trait);
+  white-space: nowrap;
+}
+
+th {
+  color: var(--discret);
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.formulaire {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.7rem;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.82rem;
+  color: var(--discret);
+}
+
+input,
+select {
+  background: #100e0a;
+  border: 1px solid var(--trait);
+  border-radius: 6px;
+  color: var(--texte);
+  padding: 0.45rem 0.55rem;
+  font: inherit;
+  width: 100%;
+}
+
+input:focus,
+select:focus {
+  outline: 2px solid var(--ambre);
+  outline-offset: 1px;
+}
+
+button {
+  background: linear-gradient(90deg, var(--ambre), var(--orange));
+  border: 0;
+  border-radius: 6px;
+  color: #201703;
+  font: inherit;
+  font-weight: 600;
+  padding: 0.5rem 0.9rem;
+  cursor: pointer;
+}
+
+button.discret {
+  background: transparent;
+  border: 1px solid var(--trait);
+  color: var(--texte);
+  font-weight: 400;
+}
+
+.barre-boutons {
+  display: flex;
+  gap: 0.6rem;
+  grid-column: 1 / -1;
+}
+
+.chiffres {
+  display: flex;
+  gap: 1.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.1rem;
+}
+
+.chiffre strong {
+  display: block;
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.chiffre span {
+  color: var(--discret);
+  font-size: 0.8rem;
+}
+
+.discret {
+  color: var(--discret);
+}
+
+.erreur,
+.succes,
+.avertissement {
+  border-radius: 0 6px 6px 0;
+  padding: 0.55rem 0.8rem;
+  margin: 0 0 0.8rem;
+}
+
+.erreur {
+  border-left: 3px solid var(--rouge);
+  background: rgba(255, 107, 94, 0.09);
+}
+
+.succes {
+  border-left: 3px solid var(--vert);
+  background: rgba(87, 217, 154, 0.09);
+}
+
+.avertissement {
+  border-left: 3px solid var(--ambre);
+  background: rgba(255, 201, 97, 0.09);
+}

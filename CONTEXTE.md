@@ -4,8 +4,24 @@
 > La vue d'ensemble des trois applications est dans [../LISEZ-MOI.md](../LISEZ-MOI.md).
 > Ce fichier-ci ne concerne que Scenika.
 
-**État : le calcul DMX est écrit et éprouvé, et la page publique gratuite
-fonctionne.** L'application elle-même n'est pas commencée. La coquille de
+**État : l'application Electron démarre.** Deux écrans : le parc matériel et le
+calculateur DMX relié au parc. La page publique gratuite fonctionne aussi.
+
+```bash
+cd Scenika && npm install && npm run dev
+cd Scenika && npm run verifier   # typecheck + tests
+```
+
+Structure calquée sur Ohmnia, et pour la même raison : la logique métier vit
+dans `src/main/domaines/`, **sans Electron**, pour que le serveur multi-postes
+puisse l'exposer par le réseau sans rien réécrire. Une société de location a
+plusieurs personnes qui touchent au même parc — c'est le cas d'usage le plus
+évident du mode multi-postes.
+
+Ce qui est déjà repris d'Ohmnia sans discuter : `node:sqlite` plutôt que
+`better-sqlite3`, preload compilé en CommonJS, `app.setName()` explicite,
+checkpoint WAL avant fermeture, `overflow-x` sur les tableaux larges. Chacun de
+ces points est un bug déjà payé une fois. La coquille de
 l'application attend une décision (section 3). Ce document décrit ce qui a été
 décidé, ce qui ne l'est pas, et les pièges connus d'avance.
 
