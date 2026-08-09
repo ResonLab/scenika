@@ -1,0 +1,10 @@
+{
+  "name": "scenika",
+  "version": "0.0.0",
+  "description": "Scenika - parc materiel son et lumiere, location, puissance, DMX",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/dmx.mjs"
+  }
+}
