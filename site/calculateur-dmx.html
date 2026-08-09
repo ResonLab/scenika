@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Calculateur DMX — Adresso par Scenika</title>
+    <meta
+      name="description"
+      content="Calculateur d'adressage DMX gratuit : adresses, univers, chevauchements. Rien n'est enregistré."
+    />
+    <style>
+      /* Dégradé de Scenika : ambre → orange. */
+      :root {
+        --ambre: #ffc961;
+        --orange: #f2751a;
+        --fond: #14110d;
+        --carte: #1e1a15;
+        --trait: #3a3227;
+        --texte: #f4efe6;
+        --discret: #a89b86;
+        --rouge: #ff6b5e;
+        --vert: #57d99a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--fond);
+        color: var(--texte);
+        font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+
+      main {
+        max-width: 60rem;
+        margin: 0 auto;
+        padding: 1.5rem 1rem 4rem;
+      }
+
+      h1 {
+        font-size: 1.6rem;
+        margin: 0 0 0.3rem;
+        background: linear-gradient(90deg, var(--ambre), var(--orange));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .sous-titre {
+        color: var(--discret);
+        margin: 0 0 1.8rem;
+      }
+
+      .carte {
+        background: var(--carte);
+        border: 1px solid var(--trait);
+        border-radius: 10px;
+        padding: 1.1rem;
+        margin-bottom: 1.2rem;
+      }
+
+      h2 {
+        font-size: 1.05rem;
+        margin: 0 0 0.9rem;
+      }
+
+      .ligne-saisie {
+        display: flex;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+        align-items: flex-end;
+      }
+
+      label {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        font-size: 0.85rem;
+        color: var(--discret);
+      }
+
+      input,
+      select {
+        background: #100e0a;
+        border: 1px solid var(--trait);
+        border-radius: 6px;
+        color: var(--texte);
+        padding: 0.5rem 0.6rem;
+        font: inherit;
+        min-width: 6rem;
+      }
+
+      input:focus,
+      select:focus {
+        outline: 2px solid var(--ambre);
+        outline-offset: 1px;
+      }
+
+      button {
+        background: linear-gradient(90deg, var(--ambre), var(--orange));
+        border: 0;
+        border-radius: 6px;
+        color: #201703;
+        font: inherit;
+        font-weight: 600;
+        padding: 0.55rem 1rem;
+        cursor: pointer;
+      }
+
+      button.discret {
+        background: transparent;
+        border: 1px solid var(--trait);
+        color: var(--texte);
+        font-weight: 400;
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* Un tableau large ne doit pas déborder sur un téléphone. */
+      .defilable {
+        overflow-x: auto;
+      }
+
+      th,
+      td {
+        text-align: left;
+        padding: 0.45rem 0.6rem;
+        border-bottom: 1px solid var(--trait);
+        white-space: nowrap;
+      }
+
+      th {
+        color: var(--discret);
+        font-weight: 500;
+        font-size: 0.85rem;
+      }
+
+      tr.en-cause td {
+        background: rgba(255, 107, 94, 0.12);
+      }
+
+      .probleme {
+        border-left: 3px solid var(--rouge);
+        padding: 0.5rem 0.75rem;
+        margin-bottom: 0.5rem;
+        background: rgba(255, 107, 94, 0.08);
+        border-radius: 0 6px 6px 0;
+      }
+
+      .tout-va-bien {
+        border-left: 3px solid var(--vert);
+        padding: 0.5rem 0.75rem;
+        background: rgba(87, 217, 154, 0.08);
+        border-radius: 0 6px 6px 0;
+      }
+
+      .vide {
+        color: var(--discret);
+      }
+
+      footer {
+        color: var(--discret);
+        font-size: 0.85rem;
+        border-top: 1px solid var(--trait);
+        padding-top: 1rem;
+      }
+
+      footer strong {
+        color: var(--texte);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Calculateur DMX</h1>
+      <p class="sous-titre">
+        Adresses, univers, chevauchements. Gratuit, sans compte —
+        <strong>rien n'est enregistré</strong>&nbsp;: tout se calcule dans votre navigateur.
+      </p>
+
+      <section class="carte">
+        <h2>Vos appareils</h2>
+        <form id="ajout" class="ligne-saisie">
+          <label>
+            Appareil
+            <input id="nom" placeholder="Lyre wash" required />
+          </label>
+          <label>
+            Canaux (mode)
+            <input id="canaux" type="number" min="1" max="512" value="16" required />
+          </label>
+          <label>
+            Quantité
+            <input id="quantite" type="number" min="1" max="200" value="4" required />
+          </label>
+          <button type="submit">Ajouter</button>
+          <button type="button" class="discret" id="vider">Tout effacer</button>
+        </form>
+      </section>
+
+      <section class="carte">
+        <h2>Patch proposé</h2>
+        <div id="messages"></div>
+        <div class="defilable">
+          <table>
+            <thead>
+              <tr>
+                <th>Appareil</th>
+                <th>Canaux</th>
+                <th>Univers</th>
+                <th>Adresse</th>
+                <th>Occupe</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="lignes"></tbody>
+          </table>
+        </div>
+        <p id="rien" class="vide">Ajoutez un appareil pour voir le patch.</p>
+      </section>
+
+      <section class="carte">
+        <h2>Ce qu'il reste de libre</h2>
+        <div id="libres" class="vide">—</div>
+      </section>
+
+      <footer>
+        <p>
+          <strong>Adresso</strong>, le calculateur DMX de
+          <strong>Scenika</strong>. Cette page fait un calcul, parfaitement, et ne retient rien.
+        </p>
+        <p>
+          L'application Scenika va plus loin&nbsp;: elle relie le patch à votre parc réel —
+          puissance des circuits, feuille de patch imprimable, patch mémorisé.
+        </p>
+        <p>
+          Un univers DMX porte 512 canaux. Un appareil en mode 16 canaux adressé en 001 occupe
+          001 à 016&nbsp;: le suivant commence à 017.
+        </p>
+      </footer>
+    </main>
+
+    <script type="module">
+      // La formule vient du fichier partagé avec l'application : cette page ne
+      // recalcule rien elle-même. C'est la règle numéro un — une formule à un
+      // seul endroit — et c'est exactement le genre de code qui diverge si on
+      // le duplique « juste pour la page web ».
+      import { plageOccupee, plagesLibres, proposerPatch, verifierPatch } from '../commun/dmx.js'
+
+      /** @type {{ nom: string, canaux: number }[]} */
+      let appareils = []
+
+      const $ = (id) => document.getElementById(id)
+
+      $('ajout').addEventListener('submit', (evenement) => {
+        evenement.preventDefault()
+        const nom = $('nom').value.trim()
+        const canaux = Number($('canaux').value)
+        const quantite = Number($('quantite').value)
+        if (!nom || canaux < 1 || quantite < 1) return
+
+        for (let i = 1; i <= quantite; i += 1) {
+          appareils.push({ nom: quantite > 1 ? `${nom} ${i}` : nom, canaux })
+        }
+        $('nom').value = ''
+        $('nom').focus()
+        afficher()
+      })
+
+      $('vider').addEventListener('click', () => {
+        appareils = []
+        afficher()
+      })
+
+      function afficher() {
+        const lignes = $('lignes')
+        lignes.textContent = ''
+        $('messages').textContent = ''
+        $('rien').hidden = appareils.length > 0
+
+        if (appareils.length === 0) {
+          $('libres').textContent = '—'
+          return
+        }
+
+        let patch
+        try {
+          patch = proposerPatch(appareils)
+        } catch (erreur) {
+          // Un appareil plus grand qu'un univers, par exemple : le message du
+          // module est déjà écrit pour un technicien, on le montre tel quel.
+          $('messages').append(bloc('probleme', erreur.message))
+          $('libres').textContent = '—'
+          return
+        }
+
+        const problemes = verifierPatch(patch)
+        const enCause = new Set(problemes.flatMap((p) => p.appareils))
+
+        if (problemes.length === 0) {
+          $('messages').append(
+            bloc('tout-va-bien', `${patch.length} appareil(s), aucun chevauchement.`)
+          )
+        } else {
+          for (const probleme of problemes) {
+            $('messages').append(bloc('probleme', probleme.message))
+          }
+        }
+
+        for (const appareil of patch) {
+          const plage = plageOccupee(appareil)
+          const ligne = document.createElement('tr')
+          if (enCause.has(appareil.nom)) ligne.className = 'en-cause'
+          for (const valeur of [
+            appareil.nom,
+            appareil.canaux,
+            appareil.univers,
+            String(appareil.adresse).padStart(3, '0'),
+            `${String(plage.premier).padStart(3, '0')} – ${String(plage.dernier).padStart(3, '0')}`
+          ]) {
+            const cellule = document.createElement('td')
+            cellule.textContent = String(valeur)
+            ligne.append(cellule)
+          }
+
+          const actions = document.createElement('td')
+          const retirer = document.createElement('button')
+          retirer.className = 'discret'
+          retirer.type = 'button'
+          retirer.textContent = 'Retirer'
+          retirer.addEventListener('click', () => {
+            appareils = appareils.filter((a) => a.nom !== appareil.nom)
+            afficher()
+          })
+          actions.append(retirer)
+          ligne.append(actions)
+          lignes.append(ligne)
+        }
+
+        const universUtilises = [...new Set(patch.map((a) => a.univers))]
+        $('libres').textContent = universUtilises
+          .map((univers) => {
+            const plages = plagesLibres(patch, univers)
+              .map((p) => `${String(p.premier).padStart(3, '0')}–${String(p.dernier).padStart(3, '0')}`)
+              .join(', ')
+            return `Univers ${univers} : ${plages || 'complet'}`
+          })
+          .join(' · ')
+      }
+
+      function bloc(classe, texte) {
+        const element = document.createElement('p')
+        element.className = classe
+        element.textContent = texte
+        return element
+      }
+
+      afficher()
+    </script>
+  </body>
+</html>

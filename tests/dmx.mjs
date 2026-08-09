@@ -1,14 +1,18 @@
 // Le calcul DMX, éprouvé sur les cas qui font perdre une soirée.
 //
-// Aucun outillage : Node 24 exécute le TypeScript tel quel. Un test qu'on peut
-// lancer sans `npm install` reste lançable dans six mois.
+// Aucun outillage : le module est du JavaScript avec les types en JSDoc, donc
+// le navigateur, Node et l'application chargent le même fichier. Un test qu'on
+// peut lancer sans `npm install` reste lançable dans six mois.
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
 import {
   CANAUX_PAR_UNIVERS,
   plageOccupee,
   plagesLibres,
   proposerPatch,
   verifierPatch
-} from '../commun/dmx.ts'
+} from '../commun/dmx.js'
 
 let echecs = 0
 function verifier(intitule, condition, detail = '') {
@@ -144,6 +148,24 @@ verifier(
   'un univers vide est libre en entier',
   plagesLibres([], 1).length === 1 && plagesLibres([], 1)[0].dernier === 512
 )
+
+console.log('\n=== La page publique ne recopie pas la formule ===')
+
+// Il est décidé qu'il existe deux calculateurs — la page gratuite et le module
+// de l'application — et **une seule formule**. Une page qui referait le calcul
+// « juste pour être autonome » divergerait au premier correctif, et personne ne
+// s'en apercevrait avant qu'un patch faux gâche une soirée.
+const PROJET = join(dirname(fileURLToPath(import.meta.url)), '..')
+const page = readFileSync(join(PROJET, 'site/calculateur-dmx.html'), 'utf-8')
+
+verifier('la page charge le module partagé', page.includes("from '../commun/dmx.js'"))
+
+const recopies = ['function proposerPatch', 'function verifierPatch', 'function plageOccupee'].filter(
+  (nom) => page.includes(nom)
+)
+verifier('la page ne redéfinit aucune fonction du module', recopies.length === 0, recopies.join(', '))
+
+verifier('la page ne réécrit pas la limite de 512 canaux', !/=\s*512/.test(page))
 
 console.log(echecs === 0 ? '\nCALCUL DMX : TOUS LES TESTS PASSENT' : `\n${echecs} TEST(S) EN ECHEC`)
 process.exitCode = echecs === 0 ? 0 : 1

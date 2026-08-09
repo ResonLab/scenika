@@ -8,7 +8,13 @@
  * le duplique, et un patch faux fait perdre une soirée à un technicien.
  *
  * Ce fichier ne dépend de rien : ni interface, ni base de données, ni Electron.
- * Node 24 l'exécute tel quel, sans compilation — d'où des tests sans outillage.
+ *
+ * **Écrit en JavaScript, avec les types en commentaires JSDoc.** Il doit tourner
+ * à trois endroits : la page web gratuite (dans un navigateur), les tests (dans
+ * Node) et plus tard l'application (Electron). En TypeScript, il faudrait le
+ * compiler pour l'envoyer au navigateur — et une formule qui a besoin d'un
+ * outil pour arriver quelque part est une formule qui finira dupliquée le jour
+ * où l'outil gêne. Ici, les trois chargent le **même fichier**.
  *
  * Vocabulaire : un **univers** DMX porte 512 **canaux**. Un appareil occupe
  * autant de canaux consécutifs que son **mode** en demande, à partir de son
@@ -18,36 +24,29 @@
 /** Un univers DMX contient 512 canaux. Ni plus, ni moins. */
 export const CANAUX_PAR_UNIVERS = 512
 
-export interface Appareil {
-  /** Identifiant libre, affiché tel quel dans les messages. */
-  nom: string
-  /**
-   * Nombre de canaux occupés. Il dépend du **mode** choisi, pas seulement du
-   * modèle : un même projecteur existe en 8, 16 ou 32 canaux. C'est pour cela
-   * qu'on le stocke par appareil et non par modèle.
-   */
-  canaux: number
-  /** Premier canal occupé, de 1 à 512. */
-  adresse: number
-  /** Univers, à partir de 1. Un seul univers si l'installation est petite. */
-  univers: number
-}
+/**
+ * @typedef {object} Appareil
+ * @property {string} nom Identifiant libre, affiché tel quel dans les messages.
+ * @property {number} canaux Nombre de canaux occupés. Il dépend du **mode**
+ *   choisi, pas seulement du modèle : un même projecteur existe en 8, 16 ou 32
+ *   canaux. C'est pour cela qu'on le stocke par appareil et non par modèle.
+ * @property {number} adresse Premier canal occupé, de 1 à 512.
+ * @property {number} univers Univers, à partir de 1.
+ */
 
-/** Plage de canaux réellement occupée par un appareil. */
-export interface Plage {
-  premier: number
-  dernier: number
-}
+/**
+ * Plage de canaux réellement occupée par un appareil.
+ * @typedef {object} Plage
+ * @property {number} premier
+ * @property {number} dernier
+ */
 
-export type GraviteProbleme = 'erreur' | 'avertissement'
-
-export interface Probleme {
-  gravite: GraviteProbleme
-  /** Message en français, destiné au technicien, pas au développeur. */
-  message: string
-  /** Noms des appareils concernés, pour les surligner à l'écran. */
-  appareils: string[]
-}
+/**
+ * @typedef {object} Probleme
+ * @property {'erreur' | 'avertissement'} gravite
+ * @property {string} message En français, destiné au technicien.
+ * @property {string[]} appareils Noms concernés, pour les surligner à l'écran.
+ */
 
 /**
  * Les canaux occupés par un appareil.
@@ -56,12 +55,16 @@ export interface Probleme {
  * l'adresse est le premier canal, pas le canal précédent. Cette erreur d'un
  * rang est la source classique des chevauchements.
  */
-export function plageOccupee(appareil: Appareil): Plage {
+/**
+ * @param {Appareil} appareil
+ * @returns {Plage}
+ */
+export function plageOccupee(appareil) {
   return { premier: appareil.adresse, dernier: appareil.adresse + appareil.canaux - 1 }
 }
 
 /** Deux plages se recouvrent-elles ? */
-function seChevauchent(a: Plage, b: Plage): boolean {
+function seChevauchent(/** @type {Plage} */ a, /** @type {Plage} */ b) {
   return a.premier <= b.dernier && b.premier <= a.dernier
 }
 
@@ -72,8 +75,13 @@ function seChevauchent(a: Plage, b: Plage): boolean {
  * technicien qui corrige son patch veut la liste, pas un aller-retour par
  * erreur. L'ordre est celui de la lecture, appareil par appareil.
  */
-export function verifierPatch(appareils: Appareil[]): Probleme[] {
-  const problemes: Probleme[] = []
+/**
+ * @param {Appareil[]} appareils
+ * @returns {Probleme[]}
+ */
+export function verifierPatch(appareils) {
+  /** @type {Probleme[]} */
+  const problemes = []
 
   for (const appareil of appareils) {
     if (!Number.isInteger(appareil.canaux) || appareil.canaux < 1) {
@@ -153,11 +161,14 @@ export function verifierPatch(appareils: Appareil[]): Probleme[] {
  * proposé reste lisible dans l'ordre de la liste, ce qui compte plus qu'un
  * remplissage optimal quand on cherche un appareil sur scène à minuit.
  */
-export function proposerPatch(
-  appareils: Pick<Appareil, 'nom' | 'canaux'>[],
-  premierUnivers = 1
-): Appareil[] {
-  const proposition: Appareil[] = []
+/**
+ * @param {{ nom: string, canaux: number }[]} appareils
+ * @param {number} [premierUnivers]
+ * @returns {Appareil[]}
+ */
+export function proposerPatch(appareils, premierUnivers = 1) {
+  /** @type {Appareil[]} */
+  const proposition = []
   let univers = premierUnivers
   let prochaine = 1
 
@@ -193,13 +204,19 @@ export function proposerPatch(
  * Ce qu'il reste de libre dans un univers, en plages continues.
  * Sert à répondre à « où puis-je encore mettre un appareil de 16 canaux ? ».
  */
-export function plagesLibres(appareils: Appareil[], univers: number): Plage[] {
+/**
+ * @param {Appareil[]} appareils
+ * @param {number} univers
+ * @returns {Plage[]}
+ */
+export function plagesLibres(appareils, univers) {
   const occupees = appareils
     .filter((a) => a.univers === univers && a.canaux >= 1 && a.adresse >= 1)
     .map(plageOccupee)
     .sort((a, b) => a.premier - b.premier)
 
-  const libres: Plage[] = []
+  /** @type {Plage[]} */
+  const libres = []
   let curseur = 1
 
   for (const plage of occupees) {

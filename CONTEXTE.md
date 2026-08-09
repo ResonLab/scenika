@@ -4,7 +4,8 @@
 > La vue d'ensemble des trois applications est dans [../LISEZ-MOI.md](../LISEZ-MOI.md).
 > Ce fichier-ci ne concerne que Scenika.
 
-**État : le calcul DMX est écrit et éprouvé. Rien d'autre.** La coquille de
+**État : le calcul DMX est écrit et éprouvé, et la page publique gratuite
+fonctionne.** L'application elle-même n'est pas commencée. La coquille de
 l'application attend une décision (section 3). Ce document décrit ce qui a été
 décidé, ce qui ne l'est pas, et les pièges connus d'avance.
 
@@ -12,11 +13,23 @@ décidé, ce qui ne l'est pas, et les pièges connus d'avance.
 cd Scenika && npm test      # aucune installation nécessaire
 ```
 
-`commun/dmx.ts` ne dépend de rien — ni interface, ni base, ni Electron. **Node 24
-exécute le TypeScript tel quel**, donc pas de `npm install`, pas d'outil de
-compilation : un test qu'on peut lancer sans rien installer reste lançable dans
-six mois. C'est ce qui a permis de commencer par le calcul sans attendre le
-choix desktop ou web.
+`commun/dmx.js` ne dépend de rien — ni interface, ni base, ni Electron.
+
+**Écrit en JavaScript, types en JSDoc, et c'est délibéré.** Ce fichier doit
+tourner à trois endroits : la page web gratuite (navigateur), les tests (Node)
+et plus tard l'application (Electron). En TypeScript, il faudrait le compiler
+pour l'envoyer au navigateur — et une formule qui a besoin d'un outil pour
+arriver quelque part finit dupliquée le jour où l'outil gêne. Les trois
+chargent **le même fichier**, sans `npm install` ni build.
+
+`site/calculateur-dmx.html` est la page gratuite : elle importe ce module et ne
+recalcule rien. **Une vérification refuse qu'elle redéfinisse une fonction du
+module ou réécrive la limite de 512** — c'est le seul moyen d'empêcher les deux
+calculateurs de diverger. Testée pour de vrai dans un navigateur : ajout
+d'appareils, bascule au second univers au bon canal, plages libres.
+
+La page a besoin d'être servie en HTTP (les modules ES ne se chargent pas
+depuis `file://`). En production, ce sera GitHub Pages.
 
 Ce qu'il fait déjà : plage occupée par un appareil, détection des
 chevauchements, dépassement de fin d'univers avec la dernière adresse possible,
