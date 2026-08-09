@@ -156,9 +156,13 @@ console.log('\n=== La page publique ne recopie pas la formule ===')
 // « juste pour être autonome » divergerait au premier correctif, et personne ne
 // s'en apercevrait avant qu'un patch faux gâche une soirée.
 const PROJET = join(dirname(fileURLToPath(import.meta.url)), '..')
-const page = readFileSync(join(PROJET, 'site/calculateur-dmx.html'), 'utf-8')
+const page = readFileSync(join(PROJET, 'docs/calculateur-dmx.html'), 'utf-8')
 
-verifier('la page charge le module partagé', page.includes("from '../commun/dmx.js'"))
+// L'import vise `./commun/dmx.js` et non `../commun/dmx.js` : GitHub Pages ne
+// sert que `docs/`, et remonter au-dessus de la racine servie tuerait le
+// calculateur en ligne sans rien casser en local. `npm run site:preparer` y
+// dépose une copie, jamais commitée — la formule reste à un seul endroit.
+verifier('la page charge le module partagé', page.includes("from './commun/dmx.js'"))
 
 const recopies = ['function proposerPatch', 'function verifierPatch', 'function plageOccupee'].filter(
   (nom) => page.includes(nom)
