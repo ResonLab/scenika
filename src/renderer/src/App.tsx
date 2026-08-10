@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import Parc from './pages/Parc'
 import CalculateurDmx from './pages/CalculateurDmx'
+import Locations from './pages/Locations'
 import { definirLangue, LANGUES, t, type Langue } from '../../partage/i18n'
 
 const MODULES = [
   { id: 'parc', cle: 'menu.parc', icone: '📦' },
+  { id: 'locations', cle: 'menu.locations', icone: '🚚' },
   { id: 'dmx', cle: 'menu.dmx', icone: '🎛️' }
 ] as const
 
@@ -91,6 +93,7 @@ export default function App(): React.JSX.Element {
 
       <main className="contenu">
         {moduleActif === 'parc' && <Parc />}
+        {moduleActif === 'locations' && <Locations />}
         {moduleActif === 'dmx' && <CalculateurDmx />}
       </main>
     </div>

@@ -55,6 +55,47 @@ const TEXTES = {
   'parc.vide': { fr: 'Le parc est vide.', en: 'The inventory is empty.' },
   'parc.canaux': { fr: 'canaux', en: 'channels' },
 
+  // --- Locations ---
+  'menu.locations': { fr: 'Locations', en: 'Rentals' },
+  'loc.titre': { fr: 'Locations', en: 'Rentals' },
+  'loc.nouvelle': { fr: '+ Nouvelle location', en: '+ New rental' },
+  'loc.client': { fr: 'Client', en: 'Client' },
+  'loc.reference': { fr: 'Référence', en: 'Reference' },
+  'loc.depart': { fr: 'Départ', en: 'Out' },
+  'loc.retour': { fr: 'Retour', en: 'Back' },
+  'loc.notes': { fr: 'Notes', en: 'Notes' },
+  'loc.materiel': { fr: 'Matériel', en: 'Equipment' },
+  'loc.prixUnitaire': { fr: 'Prix unitaire', en: 'Unit price' },
+  'loc.aucune': { fr: 'Aucune location.', en: 'No rental.' },
+  'loc.ajouterLigne': { fr: '+ Ajouter du matériel', en: '+ Add equipment' },
+  'loc.rentre': { fr: 'Rentré', en: 'Returned' },
+  'loc.manquant': { fr: '{nombre} manquant(s)', en: '{nombre} missing' },
+  'loc.exporter': { fr: 'Lignes de facture', en: 'Invoice lines' },
+  'loc.exporteVers': {
+    fr: 'Copié. Collez-le dans Ohmnia — Scenika ne facture pas, elle prépare.',
+    en: 'Copied. Paste it into Ohmnia — Scenika does not invoice, it prepares.'
+  },
+
+  // --- États d'une location ---
+  'etatLoc.prevue': { fr: 'Prévue', en: 'Planned' },
+  'etatLoc.sortie': { fr: 'Sortie', en: 'Out' },
+  'etatLoc.rentree': { fr: 'Rentrée', en: 'Returned' },
+  'etatLoc.annulee': { fr: 'Annulée', en: 'Cancelled' },
+
+  // --- Disponibilité ---
+  'dispo.titre': { fr: 'Disponible aujourd’hui', en: 'Available today' },
+  'dispo.explication': {
+    fr: 'Le parc dit ce que vous possédez ; ce qui est dehors se calcule à partir des locations sorties. Une location prévue ne retient rien.',
+    en: 'The inventory says what you own; what is out is computed from the rentals marked out. A planned rental holds nothing back.'
+  },
+  'dispo.possede': { fr: 'Possédé', en: 'Owned' },
+  'dispo.sorti': { fr: 'Sorti', en: 'Out' },
+  'dispo.disponible': { fr: 'Disponible', en: 'Available' },
+  'dispo.negatif': {
+    fr: 'Plus de matériel est sorti que vous n’en possédez.',
+    en: 'More equipment is out than you own.'
+  },
+
   // --- Calculateur DMX ---
   'dmx.titre': { fr: 'Calculateur DMX', en: 'DMX calculator' },
   'dmx.aucunAppareil': {
@@ -139,6 +180,29 @@ const TEXTES = {
   'erreur.canauxTropGrands': {
     fr: "Un appareil ne peut pas occuper plus de 512 canaux : c'est un univers entier.",
     en: 'A unit cannot occupy more than 512 channels: that is a whole universe.'
+  },
+  'erreur.clientVide': {
+    fr: 'Le nom du client est obligatoire.',
+    en: 'The client name is required.'
+  },
+  'erreur.dateDepartVide': { fr: 'La date de départ est obligatoire.', en: 'The out date is required.' },
+  'erreur.dateRetourVide': { fr: 'La date de retour est obligatoire.', en: 'The return date is required.' },
+  'erreur.retourAvantDepart': {
+    fr: 'Le retour ne peut pas être avant le départ.',
+    en: 'The return cannot be before the departure.'
+  },
+  'erreur.locationSansMateriel': {
+    fr: 'Une location doit contenir au moins un matériel.',
+    en: 'A rental must contain at least one piece of equipment.'
+  },
+  'erreur.ligneIntrouvable': { fr: 'Cette ligne n’existe plus.', en: 'This line no longer exists.' },
+  'erreur.rentrePlusQueSorti': {
+    fr: 'On ne peut pas rendre plus que ce qui est parti.',
+    en: 'You cannot return more than what went out.'
+  },
+  'erreur.locationIntrouvable': {
+    fr: 'Cette location n’existe plus.',
+    en: 'This rental no longer exists.'
   },
   'erreur.referenceExiste': {
     fr: 'La référence « {reference} » existe déjà.',
