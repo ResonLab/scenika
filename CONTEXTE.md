@@ -4,8 +4,21 @@
 > La vue d'ensemble des trois applications est dans [../LISEZ-MOI.md](../LISEZ-MOI.md).
 > Ce fichier-ci ne concerne que Scenika.
 
-**État : l'application Electron démarre.** Deux écrans : le parc matériel et le
-calculateur DMX relié au parc. La page publique gratuite fonctionne aussi.
+**État au 10 août 2026 — quatre écrans, bilingue, multi-postes, publiée.**
+
+| | |
+|---|---|
+| **Parc matériel** | écrit |
+| **Locations** | écrit — avec la disponibilité calculée et ce qui n'est pas revenu |
+| **Puissance** | écrit — répartition sur les circuits, à partir des watts du parc |
+| **Calculateur DMX** | écrit, relié au parc ; page publique gratuite bilingue |
+
+**Français et anglais** dans toute l'application (115 clés). **Multi-postes** par
+Nexika, éprouvé par le réseau. **Conditions d'utilisation** avec écran
+d'acceptation. Publiée en 0.1.0 pour Windows et Linux — mais **cette release est
+antérieure à tout ce qui précède** : il faut une 0.2.0.
+
+`npm run verifier` : typecheck + 7 suites.
 
 ```bash
 cd Scenika && npm install && npm run dev
@@ -18,12 +31,10 @@ puisse l'exposer par le réseau sans rien réécrire. Une société de location 
 plusieurs personnes qui touchent au même parc — c'est le cas d'usage le plus
 évident du mode multi-postes.
 
-Ce qui est déjà repris d'Ohmnia sans discuter : `node:sqlite` plutôt que
+Ce qui est repris d'Ohmnia sans discuter : `node:sqlite` plutôt que
 `better-sqlite3`, preload compilé en CommonJS, `app.setName()` explicite,
 checkpoint WAL avant fermeture, `overflow-x` sur les tableaux larges. Chacun de
-ces points est un bug déjà payé une fois. La coquille de
-l'application attend une décision (section 3). Ce document décrit ce qui a été
-décidé, ce qui ne l'est pas, et les pièges connus d'avance.
+ces points est un bug déjà payé une fois.
 
 ```bash
 cd Scenika && npm test      # aucune installation nécessaire
@@ -38,7 +49,7 @@ pour l'envoyer au navigateur — et une formule qui a besoin d'un outil pour
 arriver quelque part finit dupliquée le jour où l'outil gêne. Les trois
 chargent **le même fichier**, sans `npm install` ni build.
 
-`site/calculateur-dmx.html` est la page gratuite : elle importe ce module et ne
+`docs/calculateur-dmx.html` est la page gratuite : elle importe ce module et ne
 recalcule rien. **Une vérification refuse qu'elle redéfinisse une fonction du
 module ou réécrive la limite de 512** — c'est le seul moyen d'empêcher les deux
 calculateurs de diverger. Testée pour de vrai dans un navigateur : ajout
@@ -159,13 +170,36 @@ l'adresse publique — le domaine est bloqué depuis l'outil de navigation. Ce q
 est vérifié, c'est que les pages répondent en 200 et que le module servi est
 identique octet pour octet à `commun/dmx.js`.*
 
-### 2. Français et anglais — le site est fait, **l'application non**
+### 2. Français et anglais — **fait, site et application**
 
-Le site est bilingue (point 1). **L'application n'a rien** : pas de fichier
-`i18n.ts`, pas de sélecteur de langue, tout le texte des écrans en français en
-dur. C'est le chantier qui reste.
+`src/partage/i18n.ts`, 115 clés, sélecteur de langue dans le menu. La langue est
+**propre au poste** (localStorage) : le jour où plusieurs postes partagent le
+parc par Nexika, interdire à un collègue de lire en anglais parce qu'un autre a
+choisi le français n'aurait aucun sens.
 
-Ohmnia a l'infrastructure dans
+**Deux endroits n'ont pas pu recevoir `t()` directement :**
+
+· **Les refus du processus principal** étaient des phrases françaises. Il ne
+  sait pas quelle langue la fenêtre affiche : `valider()` rend maintenant une
+  **clé**, et les deux versions du texte vivent dans `i18n.ts`. Quand le message
+  cite une valeur, clé et valeur voyagent **en JSON** — un premier jet employait
+  un séparateur invisible, illisible à la relecture.
+
+· **Les problèmes de patch** viennent de `commun/dmx.js`, partagé avec la page
+  web. Le module rend un **`code` et ses `donnees`** en plus de son message
+  français. On repart du code : une traduction qui découpe une phrase se trompe
+  au premier changement de formulation.
+
+**Piège trouvé en affichant vraiment les deux langues** : `t()` repliait le
+français sur l'anglais. Les clés dont le français vit ailleurs ont un français
+vide **exprès** — un francophone recevait donc le texte anglais. Le repli ne va
+plus que de l'anglais vers le français.
+
+`tests/traductions.mjs` refuse une clé sans anglais **ni** français, une clé
+déclarée jamais employée, et tout texte français accentué en dur dans un
+composant. Éprouvé en le cassant.
+
+Le mécanisme est celui d'Ohmnia,
 `APP/src/shared/i18n.ts` : un objet `TEXTES`, une clé préfixée par écran, et
 `npm run typecheck` rejette les clés inconnues. **Reprendre ce mécanisme, pas en
 inventer un autre.** Les messages d'erreur du main process devront aussi y
@@ -189,18 +223,42 @@ Deux pièges déjà payés sur Ohmnia :
 L'icône doit être un PNG d'au moins 256×256 dans `build/icon.png`. Les PNG de la
 maison sont dans `Identite/png/`.
 
-### 4. Propre à Scenika
+### 4. Propre à Scenika — **presque tout est fait**
 
-- **Module Location** : qui a quoi, depuis quand, jusqu'à quand. Départs et
-  retours. C'est le module qui manque le plus au parc.
-- **Module Puissance** : répartition sur les circuits, à partir des watts déjà
-  saisis dans le parc. Le calculateur DMX en donne déjà le total.
-- **Export de lignes de facture vers Ohmnia** : une location se facture, et il
-  ne faut surtout pas refaire un module de facturation ici.
-- **Se brancher sur Nexika** : la couche métier est déjà sans Electron, c'est
-  fait pour. Regarder comment Ohmnia s'y prend (`APP/src/main/multipostes/`).
-- **La page web de consultation mobile**, servie par Nexika sur le réseau local.
-  Décidé, reporté : elle suppose un serveur qui tourne.
+Au 10 août 2026, il ne reste que le dernier point.
+
+**✔ Module Location.** Qui a quoi, depuis quand, jusqu'à quand, et ce qui n'est
+pas revenu. La règle à ne jamais casser : **le parc ne bouge pas quand du
+matériel part.** On pourrait décrémenter les quantités à la sortie et les
+remonter au retour — ce serait plus simple et faux. Le parc dit ce qu'on
+**possède** ; ce qui est dehors se **calcule** à partir des locations `sortie`.
+Sinon une location oubliée laisse un stock faux que rien ne rattrape, et on ne
+sait plus si l'écart vient d'un vol, d'une casse ou d'une erreur de saisie.
+
+**Seules les locations `sortie` retiennent du matériel.** Compter les `prevue`
+rendrait le parc indisponible dès qu'on esquisse un devis — et on cesserait de
+saisir les devis.
+
+**✔ Module Puissance** (`commun/puissance.js`). Le plus gourmand d'abord, puis
+dans le premier circuit qui l'accepte. **La règle est simple exprès** : un
+technicien doit pouvoir refaire la répartition de tête sur le terrain, parce que
+c'est à la main qu'il branche. Un algorithme plus fin gagnerait parfois un
+circuit et deviendrait invérifiable. Un appareil plus gourmand qu'un circuit
+entier est **refusé et nommé**, jamais casé de force.
+
+**✔ Export de lignes de facture vers Ohmnia.** `lignesDeFacture()` prépare
+désignation, quantité, prix et référence d'inventaire. Scenika ne facture pas :
+refaire un module de facturation voudrait dire tenir deux fois les règles de TVA
+et de numérotation.
+
+**✔ Branchement sur Nexika.** `src/serveur/` — registre, droits, `scenika.ts`,
+`principal.ts`. `npm run serveur:build` produit `scenika-serveur.mjs`. Vérifié en
+vrai : assistant de mise en service, HTTPS sur le réseau, session, ajout de
+matériel et lecture des disponibilités **par le réseau**, 401 sans jeton.
+
+**À faire : la page web de consultation mobile**, servie par Nexika sur le
+réseau local. Elle était « décidée, reportée » faute de serveur ; **le serveur
+tourne maintenant**, donc c'est du travail réel.
 
 ---
 
@@ -223,6 +281,34 @@ produit, affiché dans la page.
 
 Référence utile, à regarder avant de concevoir l'écran :
 <https://showtrak.co.uk/tools/lighting/dmx-calculator>
+
+---
+
+## 4 bis. Les conditions d'utilisation
+
+`src/partage/conditions.ts` porte le texte **en français et en anglais**, et
+**nulle part ailleurs** : `scripts/publier-conditions.mjs` en déduit
+`docs/conditions.html` et `docs/en/terms.html`. Recopié à la main, il
+divergerait — et deux versions d'un même engagement qui divergent, c'est pire
+que pas d'engagement : on ne sait plus laquelle on a acceptée.
+
+**Le point 2 est la raison d'être du texte** : le calcul de puissance n'est pas
+un contrôle électrique. Il ignore la longueur et la section des câbles, l'état
+du tableau, la simultanéité réelle, et les appels de courant à l'allumage.
+
+**L'écran bloque l'application**, la case ne s'active qu'après défilement
+complet, et l'acceptation est liée à `VERSION_CONDITIONS` : incrémenter la
+version fait relire. L'accord vit dans le **navigateur du poste**, pas en base —
+un accord rangé dans la base commune vaudrait pour un collègue qui n'a rien lu.
+
+`tests/coherence-conditions.mjs` compare les deux, vérifie la version, et refuse
+que les mises en garde disparaissent. **Un de ses contrôles n'a pas mordu au
+premier essai** : les phrases de référence portaient une apostrophe droite, les
+pages une apostrophe typographique. Il ne pouvait donc jamais échouer tout en
+affichant OK. Les tournures surveillées évitent désormais toute apostrophe, et
+un second contrôle vérifie qu'elles existent encore dans la source.
+
+*Réserve : ce texte est clair et honnête, il n'est pas validé par un juriste.*
 
 ---
 
