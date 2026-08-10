@@ -96,6 +96,45 @@ const TEXTES = {
     en: 'More equipment is out than you own.'
   },
 
+  // --- Puissance ---
+  'menu.puissance': { fr: 'Puissance', en: 'Power' },
+  'pui.titre': { fr: 'Répartition de puissance', en: 'Power distribution' },
+  'pui.aucunAppareil': {
+    fr: 'Aucun appareil avec une puissance déclarée. Renseignez les watts dans le parc, et ils apparaîtront ici.',
+    en: 'No equipment with a declared power draw. Enter the wattage in the inventory and it will appear here.'
+  },
+  'pui.combien': { fr: 'Combien en emmenez-vous ?', en: 'How many are you taking?' },
+  'pui.calibre': { fr: 'Calibre des circuits', en: 'Circuit rating' },
+  'pui.circuits': { fr: 'circuits', en: 'circuits' },
+  'pui.totale': { fr: 'puissance totale', en: 'total power' },
+  'pui.parCircuit': { fr: 'tenable par circuit', en: 'per circuit' },
+  'pui.circuitNumero': { fr: 'Circuit {numero}', en: 'Circuit {numero}' },
+  'pui.chargeDe': { fr: '{charge} W — {taux} % du tenable', en: '{charge} W — {taux}% of capacity' },
+  'pui.refuses': {
+    fr: 'Trop gourmands pour un circuit de ce calibre',
+    en: 'Too demanding for a circuit of this rating'
+  },
+  'pui.refuseLigne': {
+    fr: '{nom} — {puissance} W, alors qu’un circuit en tient {maximum} W',
+    en: '{nom} — {puissance} W, while a circuit holds {maximum} W'
+  },
+  'pui.refuseQuoiFaire': {
+    fr: 'Passez à un calibre supérieur, ou donnez-lui son propre circuit.',
+    en: 'Move up a rating, or give it its own circuit.'
+  },
+  'pui.regle': {
+    fr: 'Le plus gourmand d’abord, puis dans le premier circuit qui l’accepte. La règle est simple exprès : vous devez pouvoir refaire la répartition de tête sur le terrain, parce que c’est à la main que vous branchez.',
+    en: 'Biggest first, then into the first circuit that takes it. The rule is deliberately simple: you must be able to redo the split in your head on site, because you patch it by hand.'
+  },
+  'pui.marge': {
+    fr: 'Un circuit {calibre} A en {tension} V tient {theorique} W en théorie ; ce calcul en réserve {marge} %. On ne remplit jamais un circuit à fond : il déclencherait au premier appel de courant, et il déclencherait pendant le spectacle.',
+    en: 'A {calibre} A circuit at {tension} V holds {theorique} W in theory; this calculation holds back {marge}%. You never fill a circuit completely: it would trip on the first inrush, and it would trip during the show.'
+  },
+  'pui.reserve': {
+    fr: 'Ce calcul ne remplace pas un électricien. Il additionne des watts déclarés : il ne connaît ni la longueur des câbles, ni la section des conducteurs, ni l’état de l’installation, ni les appels de courant à l’allumage — une lampe à décharge peut tirer plusieurs fois sa puissance nominale pendant l’amorçage.',
+    en: 'This calculation does not replace an electrician. It adds up declared wattage: it knows nothing of cable length, conductor section, the state of the installation, or inrush current at switch-on — a discharge lamp can draw several times its rated power while striking.'
+  },
+
   // --- Calculateur DMX ---
   'dmx.titre': { fr: 'Calculateur DMX', en: 'DMX calculator' },
   'dmx.aucunAppareil': {
