@@ -3,6 +3,9 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "Bundler",
+    // Nexika designe ses modules internes avec leur extension .ts, pour que
+    // Node puisse le charger seul, sans empaqueteur.
+    "allowImportingTsExtensions": true,
     "types": ["node", "electron-vite/node"],
     "strict": true,
     "noUnusedLocals": true,
@@ -13,5 +16,6 @@
     "checkJs": false,
     "resolveJsonModule": true
   },
-  "include": ["src/main/**/*", "src/preload/**/*", "src/partage/**/*", "commun/**/*", "electron.vite.config.ts"]
+  "include": ["src/main/**/*",
+    "src/serveur/**/*", "src/preload/**/*", "src/partage/**/*", "commun/**/*", "electron.vite.config.ts"]
 }
