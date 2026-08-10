@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Calculateur DMX — Adresso par Scenika</title>
+    <title>DMX Calculator — Adresso by Scenika</title>
     <meta
       name="description"
       content="Calculateur d'adressage DMX gratuit : adresses, univers, chevauchements. Rien n'est enregistré."
@@ -187,84 +187,115 @@
   </head>
   <body>
     <nav class="langues">
-      <a href="en/calculateur-dmx.html">EN</a>
-      <a href="./">Scenika</a>
+      <a href="../calculateur-dmx.html">FR</a>
+      <a href="../en/">Scenika</a>
     </nav>
     <main>
-      <h1>Calculateur DMX</h1>
+      <h1>DMX Calculator</h1>
       <p class="sous-titre">
-        Adresses, univers, chevauchements. Gratuit, sans compte —
-        <strong>rien n'est enregistré</strong>&nbsp;: tout se calcule dans votre navigateur.
+        Addresses, universes, overlaps. Free, no account —
+        <strong>nothing is stored</strong>: everything is computed in your browser.
       </p>
 
       <section class="carte">
-        <h2>Vos appareils</h2>
+        <h2>Your fixtures</h2>
         <form id="ajout" class="ligne-saisie">
           <label>
-            Appareil
-            <input id="nom" placeholder="Lyre wash" required />
+            Fixture
+            <input id="nom" placeholder="Wash moving head" required />
           </label>
           <label>
-            Canaux (mode)
+            Channels (mode)
             <input id="canaux" type="number" min="1" max="512" value="16" required />
           </label>
           <label>
-            Quantité
+            Quantity
             <input id="quantite" type="number" min="1" max="200" value="4" required />
           </label>
-          <button type="submit">Ajouter</button>
-          <button type="button" class="discret" id="vider">Tout effacer</button>
+          <button type="submit">Add</button>
+          <button type="button" class="discret" id="vider">Clear all</button>
         </form>
       </section>
 
       <section class="carte">
-        <h2>Patch proposé</h2>
+        <h2>Proposed patch</h2>
         <div id="messages"></div>
         <div class="defilable">
           <table>
             <thead>
               <tr>
-                <th>Appareil</th>
-                <th>Canaux</th>
-                <th>Univers</th>
-                <th>Adresse</th>
-                <th>Occupe</th>
+                <th>Fixture</th>
+                <th>Channels</th>
+                <th>Universe</th>
+                <th>Address</th>
+                <th>Occupies</th>
                 <th></th>
               </tr>
             </thead>
             <tbody id="lignes"></tbody>
           </table>
         </div>
-        <p id="rien" class="vide">Ajoutez un appareil pour voir le patch.</p>
+        <p id="rien" class="vide">Add a fixture to see the patch.</p>
       </section>
 
       <section class="carte">
-        <h2>Ce qu'il reste de libre</h2>
+        <h2>What is still free</h2>
         <div id="libres" class="vide">—</div>
       </section>
 
       <footer>
         <p>
-          <strong>Adresso</strong>, le calculateur DMX de
-          <strong>Scenika</strong>. Cette page fait un calcul, parfaitement, et ne retient rien.
+          <strong>Adresso</strong>, the DMX calculator by
+          <strong>Scenika</strong>. This page does one calculation, properly, and keeps nothing.
         </p>
         <p>
-          L'application Scenika va plus loin&nbsp;: elle relie le patch à votre parc réel —
-          puissance des circuits, feuille de patch imprimable, patch mémorisé.
+          The Scenika application goes further: it ties the patch to your real inventory —
+          circuit power, printable patch sheet, saved patch.
         </p>
         <p>
-          Un univers DMX porte 512 canaux. Un appareil en mode 16 canaux adressé en 001 occupe
-          001 à 016&nbsp;: le suivant commence à 017.
+          A DMX universe holds 512 channels. A fixture in 16-channel mode addressed at 001
+          occupies 001 to 016: the next one starts at 017.
         </p>
       </footer>
     </main>
 
     <script type="module">
+      /**
+       * Le même problème, dit en anglais.
+       *
+       * `commun/dmx.js` rend un `code` et ses `donnees` en plus de son message
+       * français. On repart du code : découper la phrase française pour la
+       * retraduire se tromperait au premier changement de formulation, et
+       * personne ne s'en apercevrait avant qu'un patch faux gâche une soirée.
+       *
+       * Un code inconnu retombe sur le message du module — de l'anglais
+       * manquant vaut mieux qu'un message absent.
+       */
+      const EN_PROBLEME = {
+        canauxInvalides: (d) =>
+          `« ${d.nom} »: the channel count must be a whole number of at least 1.`,
+        adresseInvalide: (d) => `« ${d.nom} »: the address must be a whole number of at least 1.`,
+        universInvalide: (d) => `« ${d.nom} »: the universe must be a whole number of at least 1.`,
+        depassement: (d) =>
+          `« ${d.nom} » addressed at ${d.adresse} over ${d.canaux} channels runs past the end of ` +
+          `universe ${d.univers} (${d.dernier} > ${d.limite}). The last possible address for this ` +
+          `fixture is ${d.derniereAdressePossible}.`,
+        chevauchement: (d) =>
+          `« ${d.premier} » (${d.premierDebut}–${d.premierFin}) and « ${d.second} » ` +
+          `(${d.secondDebut}–${d.secondFin}) overlap in universe ${d.univers}. ` +
+          `Both fixtures will respond together.`
+      }
+
+      function direProbleme(probleme) {
+        const enAnglais = EN_PROBLEME[probleme.code]
+        return enAnglais ? enAnglais(probleme.donnees) : probleme.message
+      }
+
       // La formule vient du fichier partagé avec l'application : cette page ne
       // recalcule rien elle-même. C'est la règle numéro un — une formule à un
       // seul endroit — et c'est exactement le genre de code qui diverge si on
       // le duplique « juste pour la page web ».
-      import { plageOccupee, plagesLibres, proposerPatch, verifierPatch } from './commun/dmx.js'
+      import { plageOccupee, plagesLibres, proposerPatch, verifierPatch } from '../commun/dmx.js'
 
       /** @type {{ nom: string, canaux: number }[]} */
       let appareils = []
@@ -318,11 +349,11 @@
 
         if (problemes.length === 0) {
           $('messages').append(
-            bloc('tout-va-bien', `${patch.length} appareil(s), aucun chevauchement.`)
+            bloc('tout-va-bien', `${patch.length} fixture(s), no overlap.`)
           )
         } else {
           for (const probleme of problemes) {
-            $('messages').append(bloc('probleme', probleme.message))
+            $('messages').append(bloc('probleme', direProbleme(probleme)))
           }
         }
 
@@ -346,7 +377,7 @@
           const retirer = document.createElement('button')
           retirer.className = 'discret'
           retirer.type = 'button'
-          retirer.textContent = 'Retirer'
+          retirer.textContent = 'Remove'
           retirer.addEventListener('click', () => {
             appareils = appareils.filter((a) => a.nom !== appareil.nom)
             afficher()
@@ -362,7 +393,7 @@
             const plages = plagesLibres(patch, univers)
               .map((p) => `${String(p.premier).padStart(3, '0')}–${String(p.dernier).padStart(3, '0')}`)
               .join(', ')
-            return `Univers ${univers} : ${plages || 'complet'}`
+            return `Universe ${univers}: ${plages || 'full'}`
           })
           .join(' · ')
       }

@@ -164,6 +164,28 @@ const page = readFileSync(join(PROJET, 'docs/calculateur-dmx.html'), 'utf-8')
 // dépose une copie, jamais commitée — la formule reste à un seul endroit.
 verifier('la page charge le module partagé', page.includes("from './commun/dmx.js'"))
 
+// La page anglaise doit obéir aux mêmes règles : elle vit un cran plus bas,
+// donc son import remonte d'un niveau. Sans ce contrôle, elle pourrait
+// recopier la formule pour « être autonome » sans que rien ne le signale.
+const pageEn = readFileSync(join(PROJET, 'docs/en/calculateur-dmx.html'), 'utf-8')
+verifier(
+  'la page anglaise charge le même module partagé',
+  pageEn.includes("from '../commun/dmx.js'")
+)
+verifier(
+  'la page anglaise ne redéfinit aucune fonction du module',
+  !['function proposerPatch', 'function verifierPatch', 'function plageOccupee'].some((nom) =>
+    pageEn.includes(nom)
+  )
+)
+// Elle traduit les problèmes en repartant du `code`, jamais en découpant la
+// phrase française : une traduction qui analyse un message se trompe au premier
+// changement de formulation.
+verifier(
+  'la page anglaise traduit les problèmes par leur code',
+  pageEn.includes('probleme.code') && !pageEn.includes("probleme.message.replace")
+)
+
 const recopies = ['function proposerPatch', 'function verifierPatch', 'function plageOccupee'].filter(
   (nom) => page.includes(nom)
 )
