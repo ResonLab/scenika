@@ -80,15 +80,17 @@ const sources = fichiersTs(join(RACINE, 'src'))
   .map((f) => readFileSync(f, 'utf-8'))
   .join('\n')
 
+// `i18n.ts` est écarté du relevé des littéraux — il les contient tous, et rien
+// n'y paraîtrait jamais inutilisé. Mais c'est là que peuvent vivre des clés
+// bâties dynamiquement : on y cherche donc les préfixes, et eux seuls.
+const prefixesDynamiques = [...(sources + i18n).matchAll(/`(\w+)\.\$\{/g)].map((m) => `${m[1]}.`)
+
 const inutilisees = []
 for (const [, cle] of entrees) {
   // Une clé peut être écrite en toutes lettres — t('parc.titre') — ou bâtie à
   // partir d'un préfixe — t(`categorie.${c}`). On accepte les deux.
-  const prefixe = cle.slice(0, cle.indexOf('.') + 1)
   if (sources.includes(`'${cle}'`)) continue
-  if (sources.includes(`\`${prefixe}$`)) continue
-  if (sources.includes(`erreur.${'${'}`) && cle.startsWith('erreur.')) continue
-  if (sources.includes(`probleme.${'${'}`) && cle.startsWith('probleme.')) continue
+  if (prefixesDynamiques.some((prefixe) => cle.startsWith(prefixe))) continue
   inutilisees.push(cle)
 }
 if (inutilisees.length > 0) {

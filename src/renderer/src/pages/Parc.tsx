@@ -3,14 +3,29 @@ import { CATEGORIES, type Materiel, type ResumeParc } from '../../../partage/typ
 import { t, type CleTraduction } from '../../../partage/i18n'
 
 /**
- * Le processus principal ne renvoie qu'une clé d'erreur, et parfois une donnée
- * après un séparateur : il ne sait pas quelle langue cette fenêtre affiche.
- * Une clé inconnue est affichée telle quelle — laide, donc remarquée.
+ * Traduit une erreur remontée par le processus principal.
+ *
+ * Il n'envoie qu'une clé — il ne sait pas quelle langue cette fenêtre affiche.
+ * Quand le message cite une valeur, la clé et la valeur voyagent en JSON.
+ * Une clé inconnue est affichée telle quelle : laid, donc remarqué, donc
+ * corrigé. Un message figé dans une langue passerait inaperçu.
  */
 function traduireErreur(brut: string): string {
-  const [cle, valeur] = brut.split('')
+  let cle = brut
+  let valeurs: Record<string, string> | undefined
+
+  if (brut.startsWith('{')) {
+    try {
+      const decode = JSON.parse(brut) as { cle: string } & Record<string, string>
+      cle = decode.cle
+      valeurs = decode
+    } catch {
+      // Ce n'était pas du JSON : on affichera le texte brut.
+    }
+  }
+
   const complete = `erreur.${cle}` as CleTraduction
-  const traduit = t(complete, valeur === undefined ? undefined : { reference: valeur })
+  const traduit = t(complete, valeurs)
   return traduit === complete ? brut : traduit
 }
 

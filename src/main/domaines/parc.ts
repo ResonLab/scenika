@@ -79,8 +79,13 @@ export function ajouterMateriel(materiel: Omit<Materiel, 'id'>): Materiel {
   const existe = getDb()
     .prepare('SELECT 1 FROM materiel WHERE reference = ?')
     .get(materiel.reference.trim())
-  // La donnée voyage à part : la fenêtre l'insère dans la phrase de sa langue.
-  if (existe) throw new Error(`referenceExiste${materiel.reference.trim()}`)
+      // La donnée voyage avec la clé, en JSON : la fenêtre compose la phrase de
+  // sa langue. Un séparateur invisible aurait été plus court et illisible.
+  if (existe) {
+    throw new Error(
+      JSON.stringify({ cle: 'referenceExiste', reference: materiel.reference.trim() })
+    )
+  }
 
   const resultat = getDb()
     .prepare(
