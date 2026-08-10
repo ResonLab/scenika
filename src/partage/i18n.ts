@@ -55,6 +55,20 @@ const TEXTES = {
   'parc.vide': { fr: 'Le parc est vide.', en: 'The inventory is empty.' },
   'parc.canaux': { fr: 'canaux', en: 'channels' },
 
+  // --- Conditions d'utilisation ---
+  'conditions.titre': { fr: "Conditions d'utilisation", en: 'Terms of use' },
+  'conditions.version': { fr: 'Version {version}', en: 'Version {version}' },
+  'conditions.defilerJusquauBout': {
+    fr: 'Faites défiler le texte jusqu’au bout pour pouvoir accepter.',
+    en: 'Scroll to the end of the text to be able to accept.'
+  },
+  'conditions.jaiLu': {
+    fr: 'J’ai lu et j’accepte ces conditions.',
+    en: 'I have read and accept these terms.'
+  },
+  'conditions.accepter': { fr: 'Accepter et continuer', en: 'Accept and continue' },
+  'conditions.lireSurLeSite': { fr: 'Lire sur le site', en: 'Read on the website' },
+
   // --- Locations ---
   'menu.locations': { fr: 'Locations', en: 'Rentals' },
   'loc.titre': { fr: 'Locations', en: 'Rentals' },

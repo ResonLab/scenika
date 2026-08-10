@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Scenika — audio and lighting inventory, and DMX addressing</title>
-<meta name="description" content="Scenika manages the audio and lighting inventory of a rental company or a freelance technician: what you own, what is out, what it draws, and the DMX patch. Your data stays on your computer." />
+<title>Scenika — terms of use</title>
+<meta name="description" content="The terms of use of Scenika: what the power calculation does, and what it does not do." />
 <link rel="icon" href="../scenika.svg" type="image/svg+xml" />
 <meta property="og:title" content="Scenika" />
-<meta property="og:description" content="Audio and lighting inventory, rentals, power and DMX addressing. Your data stays with you." />
+<meta property="og:description" content="The terms of use of Scenika: what the power calculation does, and what it does not do." />
 <meta property="og:type" content="website" />
 
 <script>
@@ -276,11 +276,11 @@
       <span class="nom">Scenika</span>
     </a>
     <nav class="nav">
-      <a href="#modules">What it does</a>
-      <a href="#dmx" class="hide-sm">DMX calculator</a>
-      <a href="#principes" class="hide-sm">Our principles</a>
+      <a href="index.html#modules">What it does</a>
+      <a href="index.html#dmx" class="hide-sm">DMX calculator</a>
+      <a href="index.html#principes" class="hide-sm">Our principles</a>
       <a href="https://github.com/ResonLab/scenika">GitHub</a>
-      <a href="../" class="langue" hreflang="fr">FR</a>
+      <a href="../conditions.html" class="langue" hreflang="fr">FR</a>
       <button class="theme" id="theme" type="button" aria-label="Switch theme">
         <svg class="i-sombre" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>
@@ -296,120 +296,42 @@
 
 <main>
   <section class="hero wrap">
-    <p class="etat-ligne">RELEASED — 0.1.0 · WINDOWS AND LINUX</p>
-    <h1>Your inventory, <span class="grad-text">all of it</span>.</h1>
-    <p class="chapo">
-      What you own, what is out, what it draws, and where it sits in the patch. Scenika is built
-      for a rental company and for the technician loading the van single-handed.
-    </p>
-    <div class="actions">
-      <a class="btn" href="https://github.com/ResonLab/scenika/releases/latest">Download — Windows and Linux</a>
-      <a class="btn btn-ghost" href="calculateur-dmx.html">Free DMX calculator</a>
-      <a class="btn btn-ghost" href="#modules">What it does</a>
-    </div>
+    <p class="etat-ligne">VERSION 1.0</p>
+    <h1>Terms <span class="grad-text">of use</span>.</h1>
+    <p class="chapo">In short: your data stays with you, and the power calculation is a preparation aid — never an electrical inspection. Wiring is the work of an electrician.</p>
+    <p class="chapo">This text adds to the <a href="https://resonlab.github.io/en/terms.html">general ResonLab terms</a>.</p>
   </section>
 
-  <section id="modules" class="wrap">
-    <h2 class="titre reveal">Four modules, one inventory</h2>
-    <p class="intro reveal" style="--d:.06s">
-      Everything hangs off the real gear. A fixture has a channel count, a power draw and an owner:
-      the same record serves the patch, the load calculation and the dispatch note.
-    </p>
+  <section class="wrap">
+    <h2 class="titre reveal">1. What Scenika is</h2>
+    <p class="intro reveal">Scenika manages the audio and lighting inventory of a rental company or a freelance technician: what is owned, what is out, how power splits across circuits, and DMX addressing.</p>
+    <p class="intro reveal">Your data stays on your machine. Multi-workstation mode is an explicit choice of yours: it makes your workstations talk to a server you install yourself, on your network, and nothing leaves it.</p>
 
-    <div class="cards deux">
-      <div class="card reveal">
-        <span class="num">WRITTEN</span>
-        <h3>Inventory</h3>
-        <p>Speakers, fixtures, cables, accessories. Condition, quantities, locations.</p>
-        <p><strong>Owned gear and hired-in gear are separated at the schema level</strong>: mixing
-        them corrupts the count on the day the van goes back.</p>
-      </div>
-      <div class="card reveal" style="--d:.06s">
-        <span class="num">WRITTEN</span>
-        <h3>DMX addressing</h3>
-        <p>The patch tied to the real inventory: overlaps caught, automatic move to the next universe,
-        ranges left free.</p>
-        <p>The free version of this calculator is <a href="calculateur-dmx.html">on this page</a>,
-        with no sign-up.</p>
-      </div>
-      <div class="card reveal bientot" style="--d:.12s">
-        <span class="num">COMING</span>
-        <h3>Rentals</h3>
-        <p>Who has what, since when, until when. Out and back.</p>
-        <p>This is what the inventory misses most — and a rental gets invoiced: Scenika will export
-        lines for <a href="https://resonlab.github.io/ohmnia/en/">Ohmnia</a> to import, rather than
-        building a second invoicing module here.</p>
-      </div>
-      <div class="card reveal bientot" style="--d:.18s">
-        <span class="num">COMING</span>
-        <h3>Power</h3>
-        <p>The draw of a rig, spread across circuits, from the wattage already entered in the
-        inventory.</p>
-        <p><strong>Never presented as electrical certainty.</strong> A 16 A circuit at 230 V holds
-        about 3,600 W in theory and less in practice: the margin is shown. A mistake here kills a
-        show, or worse.</p>
-      </div>
-    </div>
-  </section>
+    <h2 class="titre reveal">2. The power calculation is not an electrical inspection</h2>
+    <p class="intro reveal">This is the most important point in this document. Scenika adds up the wattage you entered and splits it across circuits. It verifies nothing about your installation.</p>
+    <p class="intro reveal">It knows nothing of cable length or conductor section, the state of the board, the quality of the connections, whether a residual-current device is fitted, the ambient temperature, or how many units are really on at once. It also ignores inrush current: a discharge lamp can draw several times its rated power while striking, and that is often when a breaker trips.</p>
+    <p class="intro reveal">The 20% margin applied by default is common practice, not a standard. It does not replace the sizing of an installation by a qualified person.</p>
+    <p class="intro reveal">A wiring mistake can trip a breaker during a show, damage equipment, start a fire or injure someone. Electrical connection is the work of an electrician, and responsibility for your installation remains entirely yours.</p>
 
-  <section id="dmx" class="bande">
-    <div class="wrap">
-      <h2 class="titre reveal">The DMX calculator, free and whole</h2>
-      <p class="intro reveal" style="--d:.06s">
-        It does one calculation, properly, storing nothing and asking for nothing. It is not a
-        crippled demo: <strong>a tool cut down on purpose annoys instead of converting.</strong>
-      </p>
+    <h2 class="titre reveal">3. The DMX patch is a preparation aid</h2>
+    <p class="intro reveal">The calculator catches address overlaps and universe overruns from the channel counts you entered. A wrongly recorded mode produces a wrong patch with nothing to flag it.</p>
+    <p class="intro reveal">Check the patch on the actual equipment before the show. A unit answering the wrong address is obvious in the room, and never in a table.</p>
 
-      <div class="phare reveal" style="--d:.12s">
-        <div>
-          <h3>Adresso</h3>
-          <p>
-            A fixture in 16-channel mode addressed at 001 occupies 001 to 016: the next one cannot
-            start before 017. Overlapping addresses is <em>the</em> classic mistake, and it is the
-            first thing the calculator catches.
-          </p>
-          <p>
-            A universe holds 512 channels. Past that you need a second one — the calculator says so
-            and moves across, instead of producing an impossible patch.
-          </p>
-          <div class="actions">
-            <a class="btn" href="calculateur-dmx.html">Open the calculator</a>
-          </div>
-        </div>
-        <div class="patch" aria-hidden="true">
-          <div><b>U1</b> · 001–016 &nbsp; Wash 16 ch</div>
-          <div><b>U1</b> · 017–037 &nbsp; Spot 21 ch</div>
-          <div><b>U1</b> · 038–058 &nbsp; Spot 21 ch</div>
-          <div><b>U1</b> · 497–512 &nbsp; Wash 16 ch</div>
-          <div class="u2"><b>U2</b> · 001–021 &nbsp; Spot 21 ch ↰</div>
-        </div>
-      </div>
+    <h2 class="titre reveal">4. Your data and your backups</h2>
+    <p class="intro reveal">Scenika performs no automatic backup. Your inventory and rentals live in a database file on your machine, or on the one hosting the multi-workstation server.</p>
+    <p class="intro reveal">A disk failure, a theft or a slip of the hand can destroy it. Copy it elsewhere regularly, and check now and then that the copy opens.</p>
 
-      <p class="intro reveal" style="--d:.18s; margin-top:34px">
-        <strong>The formula lives in one place</strong>, shared by the page and the application. An
-        automated check refuses to let the page redefine a function of the module or rewrite the 512
-        limit: it is the only way to stop the two calculators drifting apart.
-      </p>
-    </div>
-  </section>
+    <h2 class="titre reveal">5. No warranty</h2>
+    <p class="intro reveal">Scenika is provided as is, with no warranty of uninterrupted operation or freedom from error. Software can contain defects, including in calculations.</p>
+    <p class="intro reveal">Do not rely blindly on a displayed total, on a circuit split, or on a patch.</p>
 
-  <section id="principes">
-    <div class="wrap">
-      <h2 class="titre reveal">What we stand for</h2>
-      <p class="intro reveal" style="--d:.06s">
-        Scenika follows the <a href="https://resonlab.github.io">ResonLab</a> rules, the same ones
-        as Ohmnia and Acustika.
-      </p>
+    <h2 class="titre reveal">6. Limitation of liability</h2>
+    <p class="intro reveal">To the extent permitted by law, the publisher is not liable for damages arising from the use of Scenika: loss of data, interruption of a show, damaged equipment, or damage to property or persons.</p>
+    <p class="intro reveal">This limitation does not apply in cases of gross negligence or intent, nor where the law imposes liability that cannot be excluded. Depending on your country, some of these exclusions may have no effect on you.</p>
 
-      <div class="cards">
-        <div class="card reveal"><span class="num">01</span><h3>No connection</h3><p>No account, no subscription, no usage tracking. Your inventory never leaves your machine.</p></div>
-        <div class="card reveal" style="--d:.06s"><span class="num">02</span><h3>Together, if you choose it</h3><p>A rental company has several people touching the same inventory. <a href="https://github.com/ResonLab/nexika">Nexika</a> installs on your own machine — and local mode stays the default.</p></div>
-        <div class="card reveal" style="--d:.12s"><span class="num">03</span><h3>Messages that explain</h3><p>Precise, never a raw technical error. When the software refuses a patch, it says which fixture overlaps which.</p></div>
-        <div class="card reveal" style="--d:.18s"><span class="num">04</span><h3>Nothing you cannot reopen</h3><p>Readable formats, simple code, no closed format. In ten years your inventory will still open.</p></div>
-        <div class="card reveal" style="--d:.24s"><span class="num">05</span><h3>What is not guaranteed is said</h3><p>The power calculation is an aid, not an electrical inspection. What is indicative is announced as such.</p></div>
-        <div class="card reveal" style="--d:.30s"><span class="num">06</span><h3>Checked, not claimed</h3><p>The DMX calculation is covered by tests, including the three known traps. A failing check beats a lying document.</p></div>
-      </div>
-    </div>
+    <h2 class="titre reveal">7. Acceptance</h2>
+    <p class="intro reveal">By using Scenika you acknowledge that you have read these terms and accepted that the safety of your electrical installation is your responsibility alone.</p>
+    <p class="intro reveal">If you do not accept these terms, do not use the application.</p>
   </section>
 </main>
 
