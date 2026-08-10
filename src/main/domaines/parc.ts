@@ -1,5 +1,5 @@
 import { getDb } from '../db/database'
-import type { Materiel, ResumeParc } from '../../partage/types'
+import type { CleErreur, Materiel, ResumeParc } from '../../partage/types'
 
 /**
  * Le parc matériel — logique métier, **sans Electron**.
@@ -42,20 +42,26 @@ function versMateriel(ligne: LigneMateriel): Materiel {
   }
 }
 
-function valider(materiel: Omit<Materiel, 'id'>): string | null {
-  if (!materiel.reference.trim()) return 'La référence est obligatoire.'
-  if (!materiel.designation.trim()) return 'La désignation est obligatoire.'
-  if (!Number.isInteger(materiel.quantite) || materiel.quantite < 0) {
-    return 'La quantité doit être un nombre entier positif.'
-  }
-  if (materiel.puissanceW < 0) return 'La puissance ne peut pas être négative.'
-  if (!Number.isInteger(materiel.canauxDmx) || materiel.canauxDmx < 0) {
-    return 'Le nombre de canaux DMX doit être un entier positif ou nul.'
-  }
+/**
+ * Vérifie une fiche de matériel et rend **une clé**, pas une phrase.
+ *
+ * L'interface est traduisible : un message écrit ici sortirait en français quel
+ * que soit le réglage de l'utilisateur, et le processus principal ne sait pas
+ * quelle langue la fenêtre affiche. Les deux versions du texte vivent donc
+ * ensemble dans `src/partage/i18n.ts`, sous `erreur.<clé>`.
+ *
+ * Une clé sans traduction s'afficherait telle quelle, en toutes lettres : c'est
+ * laid, donc visible, donc corrigé. Un message français figé, lui, passerait
+ * inaperçu.
+ */
+function valider(materiel: Omit<Materiel, 'id'>): CleErreur | null {
+  if (!materiel.reference.trim()) return 'referenceVide'
+  if (!materiel.designation.trim()) return 'designationVide'
+  if (!Number.isInteger(materiel.quantite) || materiel.quantite < 0) return 'quantiteNegative'
+  if (materiel.puissanceW < 0) return 'puissanceNegative'
+  if (!Number.isInteger(materiel.canauxDmx) || materiel.canauxDmx < 0) return 'canauxNegatifs'
   // Un univers DMX porte 512 canaux : au-delà, l'appareil ne tiendrait dans aucun.
-  if (materiel.canauxDmx > 512) {
-    return "Un appareil ne peut pas occuper plus de 512 canaux : c'est un univers entier."
-  }
+  if (materiel.canauxDmx > 512) return 'canauxTropGrands'
   return null
 }
 
@@ -73,7 +79,8 @@ export function ajouterMateriel(materiel: Omit<Materiel, 'id'>): Materiel {
   const existe = getDb()
     .prepare('SELECT 1 FROM materiel WHERE reference = ?')
     .get(materiel.reference.trim())
-  if (existe) throw new Error(`La référence « ${materiel.reference.trim()} » existe déjà.`)
+  // La donnée voyage à part : la fenêtre l'insère dans la phrase de sa langue.
+  if (existe) throw new Error(`referenceExiste${materiel.reference.trim()}`)
 
   const resultat = getDb()
     .prepare(

@@ -20,9 +20,21 @@ export interface Plage {
   dernier: number
 }
 
+/** Ce qui ne va pas dans un patch, indépendamment de la langue d'affichage. */
+export type CodeProbleme =
+  | 'canauxInvalides'
+  | 'adresseInvalide'
+  | 'universInvalide'
+  | 'depassement'
+  | 'chevauchement'
+
 export interface Probleme {
   gravite: 'erreur' | 'avertissement'
+  /** En français : le texte vit avec la règle qu'il décrit, à un seul endroit. */
   message: string
+  code: CodeProbleme
+  /** Les valeurs citées par le message, pour qu'une interface traduite le reformule. */
+  donnees: Record<string, string | number>
   appareils: string[]
 }
 

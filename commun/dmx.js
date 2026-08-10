@@ -45,7 +45,16 @@ export const CANAUX_PAR_UNIVERS = 512
  * @typedef {object} Probleme
  * @property {'erreur' | 'avertissement'} gravite
  * @property {string} message En français, destiné au technicien.
+ * @property {'canauxInvalides'|'adresseInvalide'|'universInvalide'|'depassement'|'chevauchement'} code
+ *   Ce qui ne va pas, indépendamment de la langue.
+ * @property {Record<string, string|number>} donnees Les valeurs citées par le message.
  * @property {string[]} appareils Noms concernés, pour les surligner à l'écran.
+ *
+ * Pourquoi un `code` **et** un `message` : le message français vit ici, à un
+ * seul endroit, et sert de repli partout. Le code et ses données permettent à
+ * une interface traduite de reformuler le même problème dans sa langue, sans
+ * recopier la règle ni analyser une chaîne de caractères — une traduction qui
+ * découpe un message finit toujours par se tromper.
  */
 
 /**
@@ -88,6 +97,8 @@ export function verifierPatch(appareils) {
       problemes.push({
         gravite: 'erreur',
         message: `« ${appareil.nom} » : le nombre de canaux doit être un entier d'au moins 1.`,
+        code: 'canauxInvalides',
+        donnees: { nom: appareil.nom },
         appareils: [appareil.nom]
       })
       continue
@@ -97,6 +108,8 @@ export function verifierPatch(appareils) {
       problemes.push({
         gravite: 'erreur',
         message: `« ${appareil.nom} » : l'adresse doit être un entier d'au moins 1.`,
+        code: 'adresseInvalide',
+        donnees: { nom: appareil.nom },
         appareils: [appareil.nom]
       })
       continue
@@ -106,6 +119,8 @@ export function verifierPatch(appareils) {
       problemes.push({
         gravite: 'erreur',
         message: `« ${appareil.nom} » : l'univers doit être un entier d'au moins 1.`,
+        code: 'universInvalide',
+        donnees: { nom: appareil.nom },
         appareils: [appareil.nom]
       })
       continue
@@ -122,6 +137,16 @@ export function verifierPatch(appareils) {
           `« ${appareil.nom} » adressé en ${appareil.adresse} sur ${appareil.canaux} canaux ` +
           `dépasse la fin de l'univers ${appareil.univers} (${plage.dernier} > ${CANAUX_PAR_UNIVERS}). ` +
           `La dernière adresse possible pour cet appareil est ${CANAUX_PAR_UNIVERS - appareil.canaux + 1}.`,
+        code: 'depassement',
+        donnees: {
+          nom: appareil.nom,
+          adresse: appareil.adresse,
+          canaux: appareil.canaux,
+          univers: appareil.univers,
+          dernier: plage.dernier,
+          limite: CANAUX_PAR_UNIVERS,
+          derniereAdressePossible: CANAUX_PAR_UNIVERS - appareil.canaux + 1
+        },
         appareils: [appareil.nom]
       })
     }
@@ -145,6 +170,16 @@ export function verifierPatch(appareils) {
           `« ${premier.nom} » (${plagePremier.premier}–${plagePremier.dernier}) et ` +
           `« ${second.nom} » (${plageSecond.premier}–${plageSecond.dernier}) se chevauchent ` +
           `dans l'univers ${premier.univers}. Les deux appareils réagiront ensemble.`,
+        code: 'chevauchement',
+        donnees: {
+          premier: premier.nom,
+          premierDebut: plagePremier.premier,
+          premierFin: plagePremier.dernier,
+          second: second.nom,
+          secondDebut: plageSecond.premier,
+          secondFin: plageSecond.dernier,
+          univers: premier.univers
+        },
         appareils: [premier.nom, second.nom]
       })
     }

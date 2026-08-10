@@ -2,13 +2,27 @@
 
 export type CategorieMateriel = 'son' | 'lumiere' | 'structure' | 'cable' | 'autre'
 
-export const CATEGORIES: { valeur: CategorieMateriel; libelle: string }[] = [
-  { valeur: 'son', libelle: 'Son' },
-  { valeur: 'lumiere', libelle: 'Lumière' },
-  { valeur: 'structure', libelle: 'Structure' },
-  { valeur: 'cable', libelle: 'Câblage' },
-  { valeur: 'autre', libelle: 'Autre' }
-]
+/**
+ * L'ordre d'affichage des catégories. Le libellé n'est plus ici : il vit dans
+ * `i18n.ts` sous `categorie.<valeur>`, parce qu'il change avec la langue.
+ */
+export const CATEGORIES: CategorieMateriel[] = ['son', 'lumiere', 'structure', 'cable', 'autre']
+
+/**
+ * Ce qui peut être refusé à l'enregistrement d'une fiche de matériel.
+ *
+ * Ce sont des **clés**, pas des phrases : le processus principal ne sait pas
+ * quelle langue la fenêtre affiche. Le texte des deux langues vit dans
+ * `i18n.ts`, sous `erreur.<clé>`.
+ */
+export type CleErreur =
+  | 'referenceVide'
+  | 'designationVide'
+  | 'quantiteNegative'
+  | 'puissanceNegative'
+  | 'canauxNegatifs'
+  | 'canauxTropGrands'
+  | 'referenceExiste'
 
 export interface Materiel {
   id: number

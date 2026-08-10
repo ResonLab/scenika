@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { plageOccupee, plagesLibres, proposerPatch, verifierPatch } from '../../../../commun/dmx.js'
 import type { Materiel } from '../../../partage/types'
+import { t, type CleTraduction } from '../../../partage/i18n'
 
 /**
  * Le calculateur DMX de l'application.
@@ -16,6 +17,26 @@ import type { Materiel } from '../../../partage/types'
 const PUISSANCE_CIRCUIT_16A = 3680
 /** Marge de sécurité : on n'annonce jamais 100 % d'un circuit comme tenable. */
 const TAUX_CHARGE_MAX = 0.8
+
+/**
+ * Reformule un problème de patch dans la langue de l'interface.
+ *
+ * `commun/dmx.js` rend un `code` et ses `donnees` en plus de son message
+ * français. On repart du code plutôt que de découper le message : une
+ * traduction qui analyse une phrase se trompe au premier changement de
+ * formulation, et personne ne s'en aperçoit avant qu'un patch faux gâche une
+ * soirée. En français, on affiche le message du module — il y vit à un seul
+ * endroit, avec la règle qu'il décrit.
+ */
+function decrireProbleme(probleme: {
+  code: string
+  message: string
+  donnees: Record<string, string | number>
+}): string {
+  const cle = `probleme.${probleme.code}` as CleTraduction
+  const traduit = t(cle, probleme.donnees)
+  return traduit === cle || traduit === '' ? probleme.message : traduit
+}
 
 export default function CalculateurDmx(): React.JSX.Element {
   const [parc, setParc] = useState<Materiel[]>([])
@@ -54,26 +75,23 @@ export default function CalculateurDmx(): React.JSX.Element {
 
   return (
     <>
-      <h1>Calculateur DMX</h1>
+      <h1>{t('dmx.titre')}</h1>
 
       {parc.length === 0 && (
-        <p className="avertissement">
-          Aucun appareil piloté en DMX dans le parc. Ajoutez du matériel avec un nombre de canaux
-          supérieur à zéro, et il apparaîtra ici.
-        </p>
+        <p className="avertissement">{t('dmx.aucunAppareil')}</p>
       )}
 
       {parc.length > 0 && (
         <div className="carte">
-          <h2>Combien en emmenez-vous ?</h2>
+          <h2>{t('dmx.combien')}</h2>
           <table>
             <thead>
               <tr>
-                <th>Appareil</th>
-                <th>Canaux</th>
-                <th>Puissance</th>
-                <th>En stock</th>
-                <th>Quantité</th>
+                <th>{t('dmx.appareil')}</th>
+                <th>{t('dmx.canaux')}</th>
+                <th>{t('parc.puissanceCourt')}</th>
+                <th>{t('dmx.enStock')}</th>
+                <th>{t('parc.quantite')}</th>
               </tr>
             </thead>
             <tbody>
@@ -112,35 +130,34 @@ export default function CalculateurDmx(): React.JSX.Element {
           <div className="chiffres">
             <div className="chiffre">
               <strong>{resultat.patch.length}</strong>
-              <span>appareils</span>
+              <span>{t('parc.appareils')}</span>
             </div>
             <div className="chiffre">
               <strong>{new Set(resultat.patch.map((a) => a.univers)).size}</strong>
-              <span>univers</span>
+              <span>{t('dmx.universPluriel')}</span>
             </div>
             <div className="chiffre">
               <strong>{(puissanceTotale / 1000).toFixed(2)} kW</strong>
-              <span>puissance appelée</span>
+              <span>{t('dmx.puissanceAppelee')}</span>
             </div>
             <div className="chiffre">
               <strong>{circuits}</strong>
-              <span>circuits 16 A minimum</span>
+              <span>{t('dmx.circuitsMin')}</span>
             </div>
           </div>
 
           <p className="avertissement">
-            Un circuit 16 A en 230 V tient environ 3 680 W en théorie ; ce calcul en réserve 20 %.
-            <strong> Ce n&apos;est pas une certitude électrique</strong> : la longueur des câbles,
-            les appels de courant à l&apos;allumage et l&apos;état de l&apos;installation comptent
-            aussi.
+            {t('dmx.avertissementCircuit')}
+            <strong>{t('dmx.avertissementCertitude')}</strong>
+            {t('dmx.avertissementSuite')}
           </p>
 
           {resultat.problemes.length === 0 ? (
-            <p className="succes">Patch cohérent : aucun chevauchement.</p>
+            <p className="succes">{t('dmx.patchCoherent')}</p>
           ) : (
             resultat.problemes.map((probleme, index) => (
               <p key={index} className="erreur">
-                {probleme.message}
+                {decrireProbleme(probleme)}
               </p>
             ))
           )}
@@ -149,11 +166,11 @@ export default function CalculateurDmx(): React.JSX.Element {
             <table>
               <thead>
                 <tr>
-                  <th>Appareil</th>
-                  <th>Canaux</th>
-                  <th>Univers</th>
-                  <th>Adresse</th>
-                  <th>Occupe</th>
+                  <th>{t('dmx.appareil')}</th>
+                  <th>{t('dmx.canaux')}</th>
+                  <th>{t('dmx.univers')}</th>
+                  <th>{t('dmx.adresse')}</th>
+                  <th>{t('dmx.occupe')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -177,16 +194,16 @@ export default function CalculateurDmx(): React.JSX.Element {
           </div>
 
           <div className="carte">
-            <h2>Ce qu&apos;il reste de libre</h2>
+            <h2>{t('dmx.resteLibre')}</h2>
             {[...new Set(resultat.patch.map((a) => a.univers))].map((univers) => (
               <p key={univers}>
-                Univers {univers} :{' '}
+                {t('dmx.univers')} {univers} :{' '}
                 {plagesLibres(resultat.patch, univers)
                   .map(
                     (plage) =>
                       `${String(plage.premier).padStart(3, '0')}–${String(plage.dernier).padStart(3, '0')}`
                   )
-                  .join(', ') || 'complet'}
+                  .join(', ') || t('dmx.complet')}
               </p>
             ))}
           </div>

@@ -1,5 +1,18 @@
 import { useEffect, useState } from 'react'
 import { CATEGORIES, type Materiel, type ResumeParc } from '../../../partage/types'
+import { t, type CleTraduction } from '../../../partage/i18n'
+
+/**
+ * Le processus principal ne renvoie qu'une clé d'erreur, et parfois une donnée
+ * après un séparateur : il ne sait pas quelle langue cette fenêtre affiche.
+ * Une clé inconnue est affichée telle quelle — laide, donc remarquée.
+ */
+function traduireErreur(brut: string): string {
+  const [cle, valeur] = brut.split('')
+  const complete = `erreur.${cle}` as CleTraduction
+  const traduit = t(complete, valeur === undefined ? undefined : { reference: valeur })
+  return traduit === complete ? brut : traduit
+}
 
 const VIDE: Omit<Materiel, 'id'> = {
   reference: '',
@@ -38,7 +51,7 @@ export default function Parc(): React.JSX.Element {
       setNouveau(null)
       await recharger()
     } catch (e) {
-      setErreur((e as Error).message)
+      setErreur(traduireErreur((e as Error).message))
     }
   }
 
@@ -56,36 +69,38 @@ export default function Parc(): React.JSX.Element {
 
   return (
     <>
-      <h1>Parc matériel</h1>
+      <h1>{t('parc.titre')}</h1>
 
       {resume && (
         <div className="chiffres">
           <div className="chiffre">
             <strong>{resume.nbReferences}</strong>
-            <span>références</span>
+            <span>{t('parc.references')}</span>
           </div>
           <div className="chiffre">
             <strong>{resume.nbAppareils}</strong>
-            <span>appareils</span>
+            <span>{t('parc.appareils')}</span>
           </div>
           <div className="chiffre">
             <strong>{(resume.puissanceTotaleW / 1000).toFixed(1)} kW</strong>
-            <span>si tout est allumé</span>
+            <span>{t('parc.siToutAllume')}</span>
           </div>
           <div className="chiffre">
             <strong>{resume.nbPilotesDmx}</strong>
-            <span>pilotés en DMX</span>
+            <span>{t('parc.pilotesDmx')}</span>
           </div>
         </div>
       )}
 
       <div className="carte">
-        {!nouveau && <button onClick={() => setNouveau({ ...VIDE })}>+ Ajouter du matériel</button>}
+        {!nouveau && (
+          <button onClick={() => setNouveau({ ...VIDE })}>{t('action.ajouterMateriel')}</button>
+        )}
 
         {nouveau && (
           <div className="formulaire">
             <label>
-              Référence
+              {t('parc.reference')}
               <input
                 value={nouveau.reference}
                 onChange={(e) => champ('reference', e.target.value)}
@@ -93,27 +108,27 @@ export default function Parc(): React.JSX.Element {
               />
             </label>
             <label>
-              Désignation
+              {t('parc.designation')}
               <input
                 value={nouveau.designation}
                 onChange={(e) => champ('designation', e.target.value)}
               />
             </label>
             <label>
-              Catégorie
+              {t('parc.categorie')}
               <select
                 value={nouveau.categorie}
                 onChange={(e) => champ('categorie', e.target.value as Materiel['categorie'])}
               >
                 {CATEGORIES.map((c) => (
-                  <option key={c.valeur} value={c.valeur}>
-                    {c.libelle}
+                  <option key={c} value={c}>
+                    {t(`categorie.${c}`)}
                   </option>
                 ))}
               </select>
             </label>
             <label>
-              Quantité
+              {t('parc.quantite')}
               <input
                 type="number"
                 min="0"
@@ -122,7 +137,7 @@ export default function Parc(): React.JSX.Element {
               />
             </label>
             <label>
-              Puissance (W)
+              {t('parc.puissance')}
               <input
                 type="number"
                 min="0"
@@ -131,7 +146,7 @@ export default function Parc(): React.JSX.Element {
               />
             </label>
             <label>
-              Canaux DMX
+              {t('parc.canauxDmx')}
               <input
                 type="number"
                 min="0"
@@ -141,7 +156,7 @@ export default function Parc(): React.JSX.Element {
               />
             </label>
             <label>
-              Emplacement
+              {t('parc.emplacement')}
               <input
                 value={nouveau.emplacement}
                 onChange={(e) => champ('emplacement', e.target.value)}
@@ -151,9 +166,9 @@ export default function Parc(): React.JSX.Element {
             {erreur && <p className="erreur">{erreur}</p>}
 
             <div className="barre-boutons">
-              <button onClick={enregistrer}>Enregistrer</button>
+              <button onClick={enregistrer}>{t('action.enregistrer')}</button>
               <button className="discret" onClick={() => setNouveau(null)}>
-                Annuler
+                {t('action.annuler')}
               </button>
             </div>
           </div>
@@ -164,13 +179,13 @@ export default function Parc(): React.JSX.Element {
         <table>
           <thead>
             <tr>
-              <th>Référence</th>
-              <th>Désignation</th>
-              <th>Catégorie</th>
-              <th>Qté</th>
-              <th>Puissance</th>
+              <th>{t('parc.reference')}</th>
+              <th>{t('parc.designation')}</th>
+              <th>{t('parc.categorie')}</th>
+              <th>{t('parc.quantiteCourt')}</th>
+              <th>{t('parc.puissanceCourt')}</th>
               <th>DMX</th>
-              <th>Emplacement</th>
+              <th>{t('parc.emplacement')}</th>
               <th></th>
             </tr>
           </thead>
@@ -179,14 +194,14 @@ export default function Parc(): React.JSX.Element {
               <tr key={m.id}>
                 <td>{m.reference}</td>
                 <td>{m.designation}</td>
-                <td>{CATEGORIES.find((c) => c.valeur === m.categorie)?.libelle ?? m.categorie}</td>
+                <td>{t(`categorie.${m.categorie}`)}</td>
                 <td>{m.quantite}</td>
                 <td>{m.puissanceW > 0 ? `${m.puissanceW} W` : '—'}</td>
-                <td>{m.canauxDmx > 0 ? `${m.canauxDmx} canaux` : '—'}</td>
+                <td>{m.canauxDmx > 0 ? `${m.canauxDmx} ${t('parc.canaux')}` : '—'}</td>
                 <td>{m.emplacement || '—'}</td>
                 <td>
                   <button className="discret" onClick={() => supprimer(m.id)}>
-                    Supprimer
+                    {t('action.supprimer')}
                   </button>
                 </td>
               </tr>
@@ -194,7 +209,7 @@ export default function Parc(): React.JSX.Element {
             {materiel.length === 0 && (
               <tr>
                 <td colSpan={8} className="discret">
-                  Le parc est vide.
+                  {t('parc.vide')}
                 </td>
               </tr>
             )}
