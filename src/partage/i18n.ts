@@ -110,6 +110,115 @@ const TEXTES = {
     en: 'More equipment is out than you own.'
   },
 
+  // --- Plan de scène ---
+  'menu.scene': { fr: 'Scène', en: 'Stage' },
+  'scene.titre': { fr: 'Plan de scène', en: 'Stage plan' },
+  'scene.explication': {
+    fr: 'Posez vos appareils sur le plan et déplacez-les à la souris. Chacun montre son adresse DMX et sa puissance : c’est en les voyant côte à côte qu’on s’aperçoit qu’on a mis les deux plus gourmands sur la même prise.',
+    en: 'Place your units on the plan and drag them with the mouse. Each shows its DMX address and power draw: seeing them side by side is how you notice you put the two greediest ones on the same outlet.'
+  },
+  'scene.aucunMateriel': {
+    fr: 'Le parc est vide. Ajoutez du matériel, et vous pourrez le poser ici.',
+    en: 'The inventory is empty. Add equipment and you will be able to place it here.'
+  },
+  'scene.aPoser': { fr: 'À poser', en: 'To place' },
+  'scene.vide': {
+    fr: 'Le plan est vide. Choisissez un appareil à gauche et posez-le.',
+    en: 'The plan is empty. Pick a unit on the left and place it.'
+  },
+  'scene.retirer': { fr: 'Retirer', en: 'Remove' },
+  'scene.vider': { fr: 'Vider le plan', en: 'Clear the plan' },
+  'scene.viderConfirme': {
+    fr: 'Retirer tous les appareils du plan ? Le parc n’est pas touché.',
+    en: 'Remove every unit from the plan? The inventory is untouched.'
+  },
+  'scene.adresserAuto': { fr: 'Adresser automatiquement', en: 'Address automatically' },
+  'scene.adresseCourt': { fr: 'Adr.', en: 'Addr.' },
+  'scene.nonAdresse': { fr: 'non adressé', en: 'unaddressed' },
+  'scene.universCourt': { fr: 'Univ.', en: 'Univ.' },
+  'scene.poses': { fr: 'appareils posés', en: 'units placed' },
+  'scene.puissancePlan': { fr: 'sur le plan', en: 'on the plan' },
+  'scene.problemesPatch': { fr: 'Ce que le patch a de gênant', en: 'What is wrong with the patch' },
+  'scene.patchSain': {
+    fr: 'Aucun chevauchement ni dépassement d’univers.',
+    en: 'No address overlap and no universe overrun.'
+  },
+  'scene.selection': { fr: 'Appareil choisi', en: 'Selected unit' },
+  'scene.etiquette': { fr: 'Étiquette', en: 'Label' },
+  'scene.adresse': { fr: 'Adresse DMX', en: 'DMX address' },
+  'scene.univers': { fr: 'Univers', en: 'Universe' },
+  'scene.nonPilote': {
+    fr: 'Cet appareil n’a aucun canal DMX déclaré : il n’est pas piloté, il se branche seulement.',
+    en: 'This unit has no declared DMX channels: it is not controlled, it is only plugged in.'
+  },
+  'scene.reserve': {
+    fr: 'Le plan est une aide à la préparation. Vérifiez le patch sur le matériel avant la représentation : un appareil qui répond à la mauvaise adresse se voit tout de suite en salle, et jamais dans un tableau.',
+    en: 'The plan is a preparation aid. Check the patch on the actual equipment before the show: a unit answering the wrong address is obvious in the room, and never in a table.'
+  },
+
+  // --- Tableaux électriques ---
+  'menu.tableaux': { fr: 'Tableaux', en: 'Boards' },
+  'tab.titre': { fr: 'Tableaux électriques', en: 'Electrical boards' },
+  'tab.explication': {
+    fr: 'Décrivez les tableaux dont vous disposez réellement. Le disjoncteur de tête compte autant que les prises : six prises de 16 A derrière un général de 32 A ne donnent pas 96 A.',
+    en: 'Describe the boards you actually have. The main breaker matters as much as the outlets: six 16 A outlets behind a 32 A main do not give you 96 A.'
+  },
+  'tab.aucun': {
+    fr: 'Aucun tableau. Ajoutez-en un, et la répartition automatique deviendra possible.',
+    en: 'No boards yet. Add one and automatic distribution becomes possible.'
+  },
+  'tab.nouveau': { fr: 'Nouveau tableau', en: 'New board' },
+  'tab.nom': { fr: 'Nom', en: 'Name' },
+  'tab.nombreDePrises': { fr: 'Nombre de prises', en: 'Number of outlets' },
+  'tab.calibrePrise': { fr: 'Calibre des prises', en: 'Outlet rating' },
+  'tab.calibreGeneral': { fr: 'Disjoncteur de tête', en: 'Main breaker' },
+  'tab.generalNonDeclare': { fr: 'non déclaré', en: 'not declared' },
+  'tab.generalExplication': {
+    fr: 'Laissez à « non déclaré » si vous l’ignorez : le calcul ne supposera alors aucune limite de tête, plutôt que d’en inventer une fausse.',
+    en: 'Leave as “not declared” if you do not know it: the calculation will then assume no main limit, rather than inventing a wrong one.'
+  },
+  'tab.ajouter': { fr: 'Ajouter le tableau', en: 'Add the board' },
+  'tab.supprimer': { fr: 'Supprimer', en: 'Delete' },
+  'tab.supprimerConfirme': {
+    fr: 'Supprimer ce tableau ? Les répartitions déjà calculées dessus n’auront plus de sens.',
+    en: 'Delete this board? Distributions already calculated on it will no longer mean anything.'
+  },
+  'tab.prises': { fr: '{nombre} prises', en: '{nombre} outlets' },
+  'tab.generalLimitant': {
+    fr: 'Le disjoncteur de tête est la vraie limite : les prises additionnées demandent {somme} A pour un général de {general} A. C’est normal — on ne branche jamais tout à fond partout.',
+    en: 'The main breaker is the real limit: the outlets added together ask for {somme} A behind a {general} A main. That is normal — you never run everything at full everywhere.'
+  },
+  'tab.repartition': { fr: 'Répartition automatique', en: 'Automatic distribution' },
+  'tab.repartitionExplication': {
+    fr: 'Les appareils posés sur le plan de scène, répartis sur vos prises réelles : le plus gourmand d’abord, la première prise qui l’accepte. Une règle simple exprès — vous devez pouvoir la refaire de tête sur le terrain, parce que c’est à la main que vous branchez.',
+    en: 'The units placed on the stage plan, spread over your real outlets: the greediest first, the first outlet that takes it. A deliberately simple rule — you must be able to redo it in your head on site, because you plug in by hand.'
+  },
+  'tab.rienAPlacer': {
+    fr: 'Aucun appareil sur le plan de scène. Posez-en, et la répartition apparaîtra ici.',
+    en: 'No units on the stage plan. Place some and the distribution will appear here.'
+  },
+  'tab.priseNumero': { fr: 'Prise {numero}', en: 'Outlet {numero}' },
+  'tab.priseLibre': { fr: 'libre', en: 'free' },
+  'tab.chargeDe': { fr: '{charge} W — {taux} % du maximum', en: '{charge} W — {taux}% of maximum' },
+  'tab.chargeTableau': {
+    fr: '{charge} W sur le tableau, {taux} % du général',
+    en: '{charge} W on the board, {taux}% of the main'
+  },
+  'tab.placee': { fr: 'placée', en: 'placed' },
+  'tab.refuses': { fr: 'Ce qui ne rentre pas', en: 'What does not fit' },
+  'tab.refusTropGourmand': {
+    fr: '« {nom} » demande {puissance} W : aucune prise n’est assez grosse. Il faut une prise de calibre supérieur, ou un autre appareil.',
+    en: '“{nom}” draws {puissance} W: no outlet is big enough. You need a higher-rated outlet, or a different unit.'
+  },
+  'tab.refusPlusDePlace': {
+    fr: '« {nom} » ({puissance} W) rentrerait, mais tout est occupé. Il faut un tableau de plus.',
+    en: '“{nom}” ({puissance} W) would fit, but everything is taken. You need another board.'
+  },
+  'tab.reserve': {
+    fr: 'Cette répartition n’est pas un contrôle électrique. Elle ignore la longueur et la section des câbles, l’état du tableau, la simultanéité réelle et les appels de courant à l’allumage. Le raccordement relève d’un électricien.',
+    en: 'This distribution is not an electrical inspection. It ignores cable length and section, the state of the board, real simultaneity and inrush current. Wiring is the work of an electrician.'
+  },
+
   // --- Puissance ---
   'menu.puissance': { fr: 'Puissance', en: 'Power' },
   'pui.titre': { fr: 'Répartition de puissance', en: 'Power distribution' },
@@ -261,6 +370,38 @@ const TEXTES = {
     fr: 'La référence « {reference} » existe déjà.',
     en: 'The reference « {reference} » already exists.'
   },
+  'erreur.tableauNomVide': {
+    fr: 'Le tableau doit avoir un nom.',
+    en: 'The board must have a name.'
+  },
+  'erreur.tableauSansPrise': {
+    fr: 'Un tableau doit avoir au moins une prise.',
+    en: 'A board must have at least one outlet.'
+  },
+  'erreur.calibreInvalide': {
+    fr: 'Le calibre d’une prise doit être supérieur à zéro.',
+    en: 'The rating of an outlet must be greater than zero.'
+  },
+  'erreur.generalNegatif': {
+    fr: 'Le calibre du disjoncteur général ne peut pas être négatif.',
+    en: 'The main breaker rating cannot be negative.'
+  },
+  'erreur.tableauIntrouvable': {
+    fr: 'Ce tableau n’existe plus.',
+    en: 'This board no longer exists.'
+  },
+  'erreur.materielIntrouvable': {
+    fr: 'Ce matériel n’existe plus.',
+    en: 'This equipment no longer exists.'
+  },
+  'erreur.positionHorsPlan': {
+    fr: 'La position doit rester sur le plan.',
+    en: 'The position must stay on the plan.'
+  },
+  'erreur.adresseInvalide': {
+    fr: 'L’adresse DMX doit être comprise entre 1 et 512, ou 0 si l’appareil n’est pas adressé.',
+    en: 'The DMX address must be between 1 and 512, or 0 if the unit is not addressed.'
+  },
 
   // --- Paramètres ---
   'param.langue': { fr: 'Langue', en: 'Language' }
@@ -301,6 +442,40 @@ export function t(cle: CleTraduction, valeurs?: Record<string, string | number>)
   return texte.replace(/\{(\w+)\}/g, (entier, nom) =>
     nom in valeurs ? String(valeurs[nom]) : entier
   )
+}
+
+/**
+ * Traduit une erreur remontée par le processus principal.
+ *
+ * Il n'envoie qu'une **clé** — il ne sait pas quelle langue cette fenêtre
+ * affiche. Quand le message cite une valeur, la clé et la valeur voyagent en
+ * JSON : un séparateur invisible dans le code serait plus court et illisible.
+ *
+ * Une clé inconnue s'affiche telle quelle, en toutes lettres : c'est laid,
+ * donc remarqué, donc corrigé. Un message figé dans une langue passerait
+ * inaperçu à l'inverse.
+ *
+ * **Elle vit ici et nulle part ailleurs.** Elle était recopiée à l'identique
+ * dans chaque page qui affiche un refus ; deux copies d'une même règle
+ * divergent au premier correctif, et c'est la règle numéro un de la maison.
+ */
+export function traduireErreur(brut: string): string {
+  let cle = brut
+  let valeurs: Record<string, string> | undefined
+
+  if (brut.startsWith('{')) {
+    try {
+      const decode = JSON.parse(brut) as { cle: string } & Record<string, string>
+      cle = decode.cle
+      valeurs = decode
+    } catch {
+      // Ce n'était pas du JSON : on affichera le texte brut.
+    }
+  }
+
+  const complete = `erreur.${cle}` as CleTraduction
+  const traduit = t(complete, valeurs)
+  return traduit === complete ? brut : traduit
 }
 
 export const LANGUES: { code: Langue; nom: string }[] = [

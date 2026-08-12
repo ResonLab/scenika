@@ -10,7 +10,7 @@
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
-    "test": "node tests/dmx.mjs && node tests/puissance.mjs && node tests/locations.mjs && node tests/serveur.mjs && node tests/coherence-conditions.mjs && node tests/traductions.mjs && node tests/coherence-site.mjs",
+    "test": "node tests/dmx.mjs && node tests/puissance.mjs && node tests/tableaux.mjs && node tests/locations.mjs && node tests/serveur.mjs && node tests/coherence-conditions.mjs && node tests/traductions.mjs && node tests/coherence-site.mjs",
     "verifier": "npm run typecheck && npm test",
     "site:preparer": "node scripts/preparer-site.mjs",
     "package:win": "electron-vite build && electron-builder --win --publish never",

@@ -35,7 +35,24 @@ export const DROITS: Record<string, Role> = {
   'locations:creer': 'ecriture',
   'locations:changerEtat': 'ecriture',
   'locations:enregistrerRetour': 'ecriture',
-  'locations:supprimer': 'administration'
+  'locations:supprimer': 'administration',
+
+  /* Tableaux électriques */
+  'tableaux:lister': 'lecture',
+  'tableaux:ajouter': 'ecriture',
+  'tableaux:modifier': 'ecriture',
+  // Supprimer un tableau efface la description d'une installation réelle, et
+  // les répartitions déjà calculées dessus cessent d'avoir un sens.
+  'tableaux:supprimer': 'administration',
+
+  /* Plan de scène */
+  'scene:lister': 'lecture',
+  'scene:poser': 'ecriture',
+  'scene:deplacer': 'ecriture',
+  // Retirer un projecteur est un geste de travail courant ; vider le plan
+  // entier efface une implantation qu'on a passé une heure à poser.
+  'scene:retirer': 'ecriture',
+  'scene:vider': 'administration'
 }
 
 /** Le rôle exigé par un canal, ou `null` s'il n'en a pas de déclaré. */

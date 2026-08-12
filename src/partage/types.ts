@@ -31,6 +31,14 @@ export type CleErreur =
   | 'ligneIntrouvable'
   | 'rentrePlusQueSorti'
   | 'locationIntrouvable'
+  | 'tableauNomVide'
+  | 'tableauSansPrise'
+  | 'calibreInvalide'
+  | 'generalNegatif'
+  | 'tableauIntrouvable'
+  | 'materielIntrouvable'
+  | 'positionHorsPlan'
+  | 'adresseInvalide'
 
 export interface Materiel {
   id: number
@@ -105,6 +113,51 @@ export interface Disponibilite {
   possede: number
   sorti: number
   disponible: number
+}
+
+/** Une prise d'un tableau électrique, avec son propre calibre. */
+export interface PriseTableau {
+  id: number
+  numero: number
+  calibreA: number
+}
+
+/**
+ * Un tableau électrique réel, tel qu'on l'a sur le lieu.
+ *
+ * `calibreGeneralA` à 0 signifie **non déclaré**, pas « aucune limite
+ * connue » : le calcul n'invente alors aucune contrainte de tête plutôt que
+ * d'en supposer une fausse.
+ */
+export interface TableauElectrique {
+  id: number
+  nom: string
+  calibreGeneralA: number
+  notes: string
+  prises: PriseTableau[]
+}
+
+/**
+ * Un appareil posé sur le plan de scène.
+ *
+ * `x` et `y` sont des **fractions du plan**, entre 0 et 1 : le plan se
+ * redimensionne avec la fenêtre, et des pixels feraient dériver tous les
+ * projecteurs dès qu'on change d'écran.
+ *
+ * `adresseDmx` à 0 veut dire « pas encore adressé ».
+ */
+export interface AppareilScene {
+  id: number
+  materielId: number
+  etiquette: string
+  x: number
+  y: number
+  univers: number
+  adresseDmx: number
+  /* Repris du parc pour l'affichage : désignation, puissance et canaux. */
+  designation: string
+  puissanceW: number
+  canauxDmx: number
 }
 
 /** Une ligne prête à être facturée par Ohmnia. */

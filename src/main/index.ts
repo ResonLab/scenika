@@ -4,6 +4,8 @@ import { definirContexte } from './contexte'
 import { fermerBaseDeDonnees, ouvrirBaseDeDonnees } from './db/database'
 import { enregistrerHandlersParc } from './ipc/parc'
 import { enregistrerHandlersLocations } from './ipc/locations'
+import { enregistrerHandlersTableaux } from './ipc/tableaux'
+import { enregistrerHandlersScene } from './ipc/scene'
 
 // Nom fixé explicitement : sans cela le dossier de données change selon le mode
 // de lancement. Bug réel vécu sur Ohmnia.
@@ -50,6 +52,8 @@ app.whenReady().then(() => {
   ouvrirBaseDeDonnees()
   enregistrerHandlersParc()
   enregistrerHandlersLocations()
+  enregistrerHandlersTableaux()
+  enregistrerHandlersScene()
 
   creerFenetrePrincipale()
 

@@ -1,33 +1,6 @@
 import { useEffect, useState } from 'react'
 import { CATEGORIES, type Materiel, type ResumeParc } from '../../../partage/types'
-import { t, type CleTraduction } from '../../../partage/i18n'
-
-/**
- * Traduit une erreur remontée par le processus principal.
- *
- * Il n'envoie qu'une clé — il ne sait pas quelle langue cette fenêtre affiche.
- * Quand le message cite une valeur, la clé et la valeur voyagent en JSON.
- * Une clé inconnue est affichée telle quelle : laid, donc remarqué, donc
- * corrigé. Un message figé dans une langue passerait inaperçu.
- */
-function traduireErreur(brut: string): string {
-  let cle = brut
-  let valeurs: Record<string, string> | undefined
-
-  if (brut.startsWith('{')) {
-    try {
-      const decode = JSON.parse(brut) as { cle: string } & Record<string, string>
-      cle = decode.cle
-      valeurs = decode
-    } catch {
-      // Ce n'était pas du JSON : on affichera le texte brut.
-    }
-  }
-
-  const complete = `erreur.${cle}` as CleTraduction
-  const traduit = t(complete, valeurs)
-  return traduit === complete ? brut : traduit
-}
+import { t, traduireErreur } from '../../../partage/i18n'
 
 const VIDE: Omit<Materiel, 'id'> = {
   reference: '',

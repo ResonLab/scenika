@@ -234,3 +234,178 @@ button.discret {
   border-left: 3px solid var(--ambre);
   background: rgba(255, 201, 97, 0.09);
 }
+
+/* ── L'écran d'acceptation des conditions ─────────────────────────────────
+   **`max-height` et `overflow-y` ne sont pas décoratifs ici : ils sont la
+   condition de fonctionnement de l'écran.** Sans eux, `.conditions-texte`
+   n'est pas une boîte à défilement — c'est la page entière qui défile, son
+   `onScroll` ne se déclenche jamais, `luJusquauBout` reste faux, et la case
+   d'acceptation ne s'active plus jamais. L'application devient impossible à
+   démarrer.
+
+   Ce n'est pas une hypothèse : Scenika était dans cet état, et cela ne s'est
+   vu qu'en la lançant. `tests/coherence-conditions.mjs` vérifie désormais que
+   ces deux propriétés existent. */
+.conditions-ecran {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.conditions-carte {
+  background: var(--carte);
+  border: 1px solid var(--trait);
+  border-radius: 10px;
+  padding: 1.5rem;
+  max-width: 760px;
+  width: 100%;
+}
+
+.conditions-carte h1 {
+  margin: 0 0 0.2rem;
+}
+
+.conditions-texte {
+  max-height: 46vh;
+  overflow-y: auto;
+  border: 1px solid var(--trait);
+  border-radius: 6px;
+  padding: 0.9rem 1.1rem;
+  margin: 1rem 0;
+  background: var(--fond);
+}
+
+.conditions-texte h2 {
+  font-size: 1rem;
+  margin: 1.2rem 0 0.4rem;
+  color: var(--ambre);
+}
+
+.conditions-texte section:first-child h2 {
+  margin-top: 0;
+}
+
+.conditions-case {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.8rem 0;
+}
+
+/* ── Champs alignés sur une ligne ─────────────────────────────────────────
+   Enveloppe plutôt que déborde : un formulaire coupé sur une fenêtre étroite
+   cache des champs obligatoires sans le dire. */
+.ligne-champs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.ligne-champs label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* ── Un circuit ou une prise, avec ce qui est branché dessus ─────────────── */
+.circuit {
+  border-top: 1px solid var(--trait);
+  padding-top: 0.6rem;
+  margin-top: 0.6rem;
+}
+
+.circuit h3,
+.circuit h4 {
+  margin: 0 0 0.3rem;
+}
+
+/* ── Le plan de scène ─────────────────────────────────────────────────────
+   Le plan est un cadre à proportions fixes et les appareils sont posés en
+   pourcentage : c'est ce qui leur évite de dériver quand la fenêtre change
+   de taille. Voir la colonne x/y de `scene_appareil`, en fractions. */
+.scene-agencement {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.scene-panneau {
+  flex: 1 1 220px;
+  max-width: 320px;
+}
+
+.scene-liste {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.scene-liste li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.2rem 0;
+}
+
+.scene-plan {
+  flex: 2 1 420px;
+  position: relative;
+  aspect-ratio: 16 / 9;
+  min-height: 320px;
+  border: 1px solid var(--trait);
+  border-radius: 8px;
+  /* Le fond dégradé marque le fond de scène en haut et le public en bas :
+     sans repère, on ne sait pas dans quel sens on regarde le plan. */
+  background:
+    linear-gradient(to bottom, rgba(242, 117, 26, 0.12), transparent 40%),
+    var(--carte);
+  overflow: hidden;
+  cursor: crosshair;
+}
+
+.scene-vide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1rem;
+  pointer-events: none;
+}
+
+.scene-appareil {
+  position: absolute;
+  /* Le point posé est le centre de l'étiquette, pas son coin : on vise un
+     projecteur, on ne pose pas un rectangle. */
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--trait);
+  border-radius: 6px;
+  background: var(--fond);
+  font-size: 0.75rem;
+  line-height: 1.25;
+  white-space: nowrap;
+  cursor: grab;
+  user-select: none;
+}
+
+.scene-appareil.choisi {
+  border-color: var(--ambre);
+  box-shadow: 0 0 0 2px rgba(255, 201, 97, 0.28);
+}
+
+.scene-appareil span {
+  color: var(--discret);
+}

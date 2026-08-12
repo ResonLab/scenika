@@ -6,7 +6,7 @@ import {
   type Location,
   type Materiel
 } from '../../../partage/types'
-import { t, type CleTraduction } from '../../../partage/i18n'
+import { t, traduireErreur } from '../../../partage/i18n'
 
 /**
  * Les locations : qui a quoi, depuis quand, jusqu'à quand.
@@ -16,26 +16,6 @@ import { t, type CleTraduction } from '../../../partage/i18n'
  * allers-retours pour savoir si on peut accepter une demande, et on finirait
  * par accepter sans regarder.
  */
-
-/** Le processus principal ne renvoie qu'une clé : il ignore la langue affichée. */
-function traduireErreur(brut: string): string {
-  let cle = brut
-  let valeurs: Record<string, string> | undefined
-
-  if (brut.startsWith('{')) {
-    try {
-      const decode = JSON.parse(brut) as { cle: string } & Record<string, string>
-      cle = decode.cle
-      valeurs = decode
-    } catch {
-      // Ce n'était pas du JSON : on affichera le texte brut.
-    }
-  }
-
-  const complete = `erreur.${cle}` as CleTraduction
-  const traduit = t(complete, valeurs)
-  return traduit === complete ? brut : traduit
-}
 
 const VIDE = {
   client: '',

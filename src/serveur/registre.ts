@@ -14,6 +14,19 @@ import {
   listerLocations,
   supprimerLocation
 } from '../main/domaines/locations'
+import {
+  ajouterTableau,
+  listerTableaux,
+  modifierTableau,
+  supprimerTableau
+} from '../main/domaines/tableaux'
+import {
+  deplacerAppareil,
+  listerScene,
+  poserAppareil,
+  retirerAppareil,
+  viderScene
+} from '../main/domaines/scene'
 
 /**
  * Ce que Scenika expose par le réseau, canal par canal.
@@ -41,5 +54,18 @@ export const REGISTRE: Record<string, Operation> = {
   'locations:enregistrerRetour': (ligneId, quantite) =>
     enregistrerRetour(ligneId as number, quantite as number),
   'locations:supprimer': (id) => supprimerLocation(id as number),
-  'locations:lignesDeFacture': (id) => lignesDeFacture(id as number)
+  'locations:lignesDeFacture': (id) => lignesDeFacture(id as number),
+
+  /* Tableaux électriques */
+  'tableaux:lister': () => listerTableaux(),
+  'tableaux:ajouter': (tableau) => ajouterTableau(tableau as never),
+  'tableaux:modifier': (tableau) => modifierTableau(tableau as never),
+  'tableaux:supprimer': (id) => supprimerTableau(id as number),
+
+  /* Plan de scène */
+  'scene:lister': () => listerScene(),
+  'scene:poser': (appareil) => poserAppareil(appareil as never),
+  'scene:deplacer': (appareil) => deplacerAppareil(appareil as never),
+  'scene:retirer': (id) => retirerAppareil(id as number),
+  'scene:vider': () => viderScene()
 }

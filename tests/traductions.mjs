@@ -142,9 +142,39 @@ for (const chemin of fichiersTs(join(RACINE, 'src/renderer'))) {
   })
 }
 
+/* ── 4. Chaque CleErreur a bien sa traduction ────────────────────────────── */
+
+// Les clés `erreur.*` échappent au contrôle 2 : elles sont bâties
+// dynamiquement dans `traduireErreur`, donc le relevé des littéraux ne les
+// voit jamais. **C'était un angle mort** : une `CleErreur` renvoyée par un
+// domaine sans entrée correspondante dans `TEXTES` s'afficherait à l'écran
+// sous sa forme brute — « tableauSansPrise » en plein milieu d'un formulaire.
+//
+// Le type `CleErreur` de `types.ts` est la liste de ce que le métier peut
+// refuser ; on vérifie que chacune est traduisible.
+const types = sansRetourChariot(readFileSync(join(RACINE, 'src/partage/types.ts'), 'utf-8'))
+const blocCleErreur = types.slice(
+  types.indexOf('export type CleErreur ='),
+  types.indexOf('export interface Materiel')
+)
+const clesErreur = [...blocCleErreur.matchAll(/\|\s*'([^']+)'/g)].map((m) => m[1])
+
+if (clesErreur.length < 5) {
+  echec(`seulement ${clesErreur.length} CleErreur relevées — le format de types.ts a changé`)
+}
+
+const sansTraduction = clesErreur.filter((cle) => !i18n.includes(`'erreur.${cle}'`))
+if (sansTraduction.length > 0) {
+  echec(
+    `CleErreur sans traduction, elles sortiraient en clé brute à l'écran : ` +
+      sansTraduction.join(', ')
+  )
+}
+
 console.log(
   echecs === 0
-    ? `TRADUCTIONS : ${entrees.length} clés, toutes traduites et employées`
+    ? `TRADUCTIONS : ${entrees.length} clés, toutes traduites et employées, ` +
+        `${clesErreur.length} refus métier traduisibles`
     : `${echecs} PROBLÈME(S) DE TRADUCTION`
 )
 process.exit(echecs === 0 ? 0 : 1)

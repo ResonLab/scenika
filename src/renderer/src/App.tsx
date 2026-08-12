@@ -3,6 +3,8 @@ import Parc from './pages/Parc'
 import CalculateurDmx from './pages/CalculateurDmx'
 import Locations from './pages/Locations'
 import Puissance from './pages/Puissance'
+import Scene from './pages/Scene'
+import Tableaux from './pages/Tableaux'
 import { definirLangue, LANGUES, t, type Langue } from '../../partage/i18n'
 import ConditionsUtilisation from './components/ConditionsUtilisation'
 import { VERSION_CONDITIONS } from '../../partage/conditions'
@@ -10,6 +12,8 @@ import { VERSION_CONDITIONS } from '../../partage/conditions'
 const MODULES = [
   { id: 'parc', cle: 'menu.parc', icone: '📦' },
   { id: 'locations', cle: 'menu.locations', icone: '🚚' },
+  { id: 'scene', cle: 'menu.scene', icone: '🎭' },
+  { id: 'tableaux', cle: 'menu.tableaux', icone: '🔌' },
   { id: 'puissance', cle: 'menu.puissance', icone: '⚡' },
   { id: 'dmx', cle: 'menu.dmx', icone: '🎛️' }
 ] as const
@@ -138,6 +142,8 @@ export default function App(): React.JSX.Element {
       <main className="contenu">
         {moduleActif === 'parc' && <Parc />}
         {moduleActif === 'locations' && <Locations />}
+        {moduleActif === 'scene' && <Scene />}
+        {moduleActif === 'tableaux' && <Tableaux />}
         {moduleActif === 'puissance' && <Puissance />}
         {moduleActif === 'dmx' && <CalculateurDmx />}
       </main>
