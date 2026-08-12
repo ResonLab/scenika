@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { plageOccupee, plagesLibres, proposerPatch, verifierPatch } from '../../../../commun/dmx.js'
 import type { Materiel } from '../../../partage/types'
 import { t, type CleTraduction } from '../../../partage/i18n'
+import CarteDmx from '../components/CarteDmx'
 
 /**
  * Le calculateur DMX de l'application.
@@ -196,15 +197,21 @@ export default function CalculateurDmx(): React.JSX.Element {
           <div className="carte">
             <h2>{t('dmx.resteLibre')}</h2>
             {[...new Set(resultat.patch.map((a) => a.univers))].map((univers) => (
-              <p key={univers}>
-                {t('dmx.univers')} {univers} :{' '}
-                {plagesLibres(resultat.patch, univers)
-                  .map(
-                    (plage) =>
-                      `${String(plage.premier).padStart(3, '0')}–${String(plage.dernier).padStart(3, '0')}`
-                  )
-                  .join(', ') || t('dmx.complet')}
-              </p>
+              <div key={univers}>
+                <p>
+                  {t('dmx.univers')} {univers} :{' '}
+                  {plagesLibres(resultat.patch, univers)
+                    .map(
+                      (plage) =>
+                        `${String(plage.premier).padStart(3, '0')}–${String(plage.dernier).padStart(3, '0')}`
+                    )
+                    .join(', ') || t('dmx.complet')}
+                </p>
+                {/* Les plages en toutes lettres disent où il reste de la
+                    place ; la carte montre la forme du trou. Les deux sortent
+                    du même module, elles ne peuvent pas se contredire. */}
+                <CarteDmx appareils={resultat.patch} univers={univers} />
+              </div>
             ))}
           </div>
         </>

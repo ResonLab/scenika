@@ -264,3 +264,61 @@ export function plagesLibres(appareils, univers) {
 
   return libres
 }
+
+/**
+ * L'état de chacun des 512 canaux d'un univers.
+ *
+ * C'est ce qui permet de **voir** un univers d'un coup d'œil au lieu de le
+ * lire ligne à ligne : les trous, les blocs occupés, et surtout les
+ * chevauchements, qui sont l'erreur classique du patch.
+ *
+ * **Le calcul vit ici, avec `verifierPatch` et `plagesLibres`**, parce que la
+ * page web gratuite doit pouvoir l'afficher aussi. Recompté dans l'interface,
+ * il finirait par contredire la liste des problèmes affichée juste à côté —
+ * et on ne saurait plus laquelle croire.
+ *
+ * Trois états seulement, et le troisième est celui qui compte :
+ * `libre` · `occupe` · `chevauchement`.
+ *
+ * Un appareil qui déborde la fin de l'univers n'est compté que sur les canaux
+ * qui existent. Le dépassement lui-même est déjà signalé par `verifierPatch` :
+ * l'inventer une seconde fois ici donnerait deux messages pour une faute.
+ */
+/**
+ * @typedef {object} CanalOccupe
+ * @property {number} canal Numéro du canal, de 1 à 512.
+ * @property {'libre' | 'occupe' | 'chevauchement'} etat
+ * @property {string[]} appareils Les noms qui occupent ce canal.
+ */
+
+/**
+ * @param {Appareil[]} appareils
+ * @param {number} univers
+ * @returns {CanalOccupe[]}
+ */
+export function occupationUnivers(appareils, univers) {
+  /** @type {CanalOccupe[]} */
+  const canaux = Array.from({ length: CANAUX_PAR_UNIVERS }, (rien, index) => ({
+    canal: index + 1,
+    etat: 'libre',
+    appareils: []
+  }))
+
+  for (const appareil of appareils) {
+    if (appareil.univers !== univers) continue
+    if (!(appareil.canaux >= 1) || !(appareil.adresse >= 1)) continue
+
+    const plage = plageOccupee(appareil)
+    const dernier = Math.min(plage.dernier, CANAUX_PAR_UNIVERS)
+
+    for (let canal = plage.premier; canal <= dernier; canal += 1) {
+      const case_ = canaux[canal - 1]
+      case_.appareils.push(appareil.nom)
+      // Deux appareils sur le même canal : c'est un chevauchement, et il ne
+      // redevient jamais un simple « occupé ».
+      case_.etat = case_.appareils.length > 1 ? 'chevauchement' : 'occupe'
+    }
+  }
+
+  return canaux
+}

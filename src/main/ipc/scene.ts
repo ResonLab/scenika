@@ -8,10 +8,10 @@ import {
 } from '../domaines/scene'
 import type { AppareilScene } from '../../partage/types'
 
-type AppareilPose = Omit<AppareilScene, 'id' | 'designation' | 'puissanceW' | 'canauxDmx'>
+type AppareilPose = Omit<AppareilScene, 'id' | 'designation' | 'puissanceW' | 'modesDmx'>
 type AppareilDeplace = Pick<
   AppareilScene,
-  'id' | 'etiquette' | 'x' | 'y' | 'univers' | 'adresseDmx'
+  'id' | 'etiquette' | 'x' | 'y' | 'univers' | 'adresseDmx' | 'canauxDmx'
 >
 
 /**

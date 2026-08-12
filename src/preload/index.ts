@@ -48,10 +48,13 @@ const api = {
   scene: {
     lister: (): Promise<AppareilScene[]> => ipcRenderer.invoke('scene:lister'),
     poser: (
-      appareil: Omit<AppareilScene, 'id' | 'designation' | 'puissanceW' | 'canauxDmx'>
+      appareil: Omit<AppareilScene, 'id' | 'designation' | 'puissanceW' | 'modesDmx'>
     ): Promise<AppareilScene> => ipcRenderer.invoke('scene:poser', appareil),
     deplacer: (
-      appareil: Pick<AppareilScene, 'id' | 'etiquette' | 'x' | 'y' | 'univers' | 'adresseDmx'>
+      appareil: Pick<
+        AppareilScene,
+        'id' | 'etiquette' | 'x' | 'y' | 'univers' | 'adresseDmx' | 'canauxDmx'
+      >
     ): Promise<AppareilScene> => ipcRenderer.invoke('scene:deplacer', appareil),
     retirer: (id: number): Promise<void> => ipcRenderer.invoke('scene:retirer', id),
     vider: (): Promise<void> => ipcRenderer.invoke('scene:vider')

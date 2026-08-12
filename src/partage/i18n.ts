@@ -51,6 +51,7 @@ const TEXTES = {
   'parc.puissance': { fr: 'Puissance (W)', en: 'Power (W)' },
   'parc.puissanceCourt': { fr: 'Puissance', en: 'Power' },
   'parc.canauxDmx': { fr: 'Canaux DMX', en: 'DMX channels' },
+  'parc.modesDmx': { fr: 'Autres modes', en: 'Other modes' },
   'parc.emplacement': { fr: 'Emplacement', en: 'Location' },
   'parc.vide': { fr: 'Le parc est vide.', en: 'The inventory is empty.' },
   'parc.canaux': { fr: 'canaux', en: 'channels' },
@@ -146,6 +147,8 @@ const TEXTES = {
   'scene.selection': { fr: 'Appareil choisi', en: 'Selected unit' },
   'scene.etiquette': { fr: 'Étiquette', en: 'Label' },
   'scene.adresse': { fr: 'Adresse DMX', en: 'DMX address' },
+  'scene.mode': { fr: 'Mode', en: 'Mode' },
+  'scene.modeCanaux': { fr: '{canaux} canaux', en: '{canaux} channels' },
   'scene.univers': { fr: 'Univers', en: 'Universe' },
   'scene.nonPilote': {
     fr: 'Cet appareil n’a aucun canal DMX déclaré : il n’est pas piloté, il se branche seulement.',
@@ -154,6 +157,22 @@ const TEXTES = {
   'scene.reserve': {
     fr: 'Le plan est une aide à la préparation. Vérifiez le patch sur le matériel avant la représentation : un appareil qui répond à la mauvaise adresse se voit tout de suite en salle, et jamais dans un tableau.',
     en: 'The plan is a preparation aid. Check the patch on the actual equipment before the show: a unit answering the wrong address is obvious in the room, and never in a table.'
+  },
+
+  // --- Carte des 512 canaux ---
+  'carteDmx.titre': { fr: 'Occupation de l’univers', en: 'Universe occupancy' },
+  'carteDmx.libre': { fr: '{nombre} libres', en: '{nombre} free' },
+  'carteDmx.occupe': { fr: '{nombre} occupés', en: '{nombre} used' },
+  'carteDmx.chevauchement': { fr: '{nombre} en chevauchement', en: '{nombre} overlapping' },
+  'carteDmx.canalLibre': { fr: 'Canal {canal} — libre', en: 'Channel {canal} — free' },
+  'carteDmx.canalPris': { fr: 'Canal {canal} — {appareils}', en: 'Channel {canal} — {appareils}' },
+  'carteDmx.resume': {
+    fr: 'Univers {univers} : {occupe} canaux occupés sur {total}, {chevauchement} en chevauchement.',
+    en: 'Universe {univers}: {occupe} channels used out of {total}, {chevauchement} overlapping.'
+  },
+  'carteDmx.alerte': {
+    fr: '{nombre} canaux sont demandés par plusieurs appareils. Deux appareils sur la même adresse répondent ensemble, et le second ne s’allumera jamais seul.',
+    en: '{nombre} channels are claimed by more than one unit. Two units on the same address answer together, and the second will never light on its own.'
   },
 
   // --- Tableaux électriques ---
@@ -401,6 +420,18 @@ const TEXTES = {
   'erreur.adresseInvalide': {
     fr: 'L’adresse DMX doit être comprise entre 1 et 512, ou 0 si l’appareil n’est pas adressé.',
     en: 'The DMX address must be between 1 and 512, or 0 if the unit is not addressed.'
+  },
+  'erreur.modeInvalide': {
+    fr: 'Le mode doit valoir entre 1 et 512 canaux, ou 0 pour reprendre le mode habituel.',
+    en: 'The mode must be between 1 and 512 channels, or 0 to use the usual mode.'
+  },
+  'erreur.modeDebordeUnivers': {
+    fr: 'À cette adresse, ce mode dépasse la fin de l’univers. Reculez l’adresse ou choisissez un mode plus court.',
+    en: 'At this address, this mode runs past the end of the universe. Lower the address or pick a shorter mode.'
+  },
+  'erreur.modesMalEcrits': {
+    fr: 'Les autres modes s’écrivent en nombres de canaux séparés par des virgules, par exemple « 8,12,16 ».',
+    en: 'The other modes are written as channel counts separated by commas, for example “8,12,16”.'
   },
 
   // --- Paramètres ---

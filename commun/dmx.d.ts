@@ -45,3 +45,16 @@ export function proposerPatch(
   premierUnivers?: number
 ): Appareil[]
 export function plagesLibres(appareils: Appareil[], univers: number): Plage[]
+
+/** `chevauchement` est le seul des trois qui soit une faute. */
+export type EtatCanal = 'libre' | 'occupe' | 'chevauchement'
+
+export interface CanalOccupe {
+  /** De 1 à 512. */
+  canal: number
+  etat: EtatCanal
+  /** Les noms qui occupent ce canal. Plus d'un : c'est le chevauchement. */
+  appareils: string[]
+}
+
+export function occupationUnivers(appareils: Appareil[], univers: number): CanalOccupe[]

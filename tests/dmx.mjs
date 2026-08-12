@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import {
   CANAUX_PAR_UNIVERS,
+  occupationUnivers,
   plageOccupee,
   plagesLibres,
   proposerPatch,
@@ -192,6 +193,114 @@ const recopies = ['function proposerPatch', 'function verifierPatch', 'function 
 verifier('la page ne redéfinit aucune fonction du module', recopies.length === 0, recopies.join(', '))
 
 verifier('la page ne réécrit pas la limite de 512 canaux', !/=\s*512/.test(page))
+
+/* ── La carte d occupation des 512 canaux ─────────────────────────────────
+   Elle sert a voir un univers d un coup d oeil. Elle doit donc dire la meme
+   chose que verifierPatch : deux affichages du meme patch qui se contredisent,
+   c est pire qu un seul. */
+
+const deuxAppareils = [
+  { nom: 'A', canaux: 8, adresse: 1, univers: 1 },
+  { nom: 'B', canaux: 8, adresse: 5, univers: 1 }
+]
+const carte = occupationUnivers(deuxAppareils, 1)
+
+verifier('la carte compte exactement 512 canaux', carte.length === CANAUX_PAR_UNIVERS)
+verifier('le premier canal porte le numero 1', carte[0].canal === 1)
+verifier('le dernier canal porte le numero 512', carte[511].canal === 512)
+
+verifier('un canal pris par un seul appareil est « occupe »', carte[0].etat === 'occupe')
+verifier('et il nomme cet appareil', carte[0].appareils.join() === 'A')
+
+// A occupe 1 a 8, B occupe 5 a 12 : le recouvrement va de 5 a 8.
+verifier('un canal pris par deux appareils est « chevauchement »', carte[4].etat === 'chevauchement')
+verifier('et il nomme les deux', carte[4].appareils.join() === 'A,B', carte[4].appareils.join())
+verifier('le canal 8 chevauche encore', carte[7].etat === 'chevauchement')
+verifier('le canal 9 n appartient plus qu a B', carte[8].etat === 'occupe')
+verifier('le canal 13 est libre', carte[12].etat === 'libre')
+verifier('un canal libre ne nomme personne', carte[12].appareils.length === 0)
+
+// Un chevauchement ne doit jamais redevenir un simple « occupe » : si le
+// dernier appareil pose ecrasait l etat, la faute disparaitrait de la carte
+// tout en restant dans la liste des problemes.
+const troisSurUn = occupationUnivers(
+  [
+    { nom: 'A', canaux: 4, adresse: 1, univers: 1 },
+    { nom: 'B', canaux: 4, adresse: 1, univers: 1 },
+    { nom: 'C', canaux: 1, adresse: 1, univers: 1 }
+  ],
+  1
+)
+verifier('trois appareils sur un canal restent un chevauchement', troisSurUn[0].etat === 'chevauchement')
+verifier('et les trois sont nommes', troisSurUn[0].appareils.length === 3)
+
+// **Un appareil pose mais pas encore adresse n occupe rien.** C est l etat
+// normal d un projecteur qu on vient de poser sur le plan de scene, avant
+// l adressage automatique. Sans ce refus, il se rangerait au canal 0 ou
+// ailleurs, et la carte annoncerait un chevauchement imaginaire — ou pire,
+// masquerait un canal reellement libre.
+const nonAdresse = occupationUnivers(
+  [
+    { nom: 'PoseSansAdresse', canaux: 8, adresse: 0, univers: 1 },
+    { nom: 'Adresse', canaux: 4, adresse: 1, univers: 1 }
+  ],
+  1
+)
+verifier(
+  'un appareil sans adresse n occupe aucun canal',
+  nonAdresse.every((c) => !c.appareils.includes('PoseSansAdresse')),
+  nonAdresse.filter((c) => c.appareils.includes('PoseSansAdresse')).length + ' canaux occupes'
+)
+verifier(
+  'et il ne fabrique pas de chevauchement imaginaire',
+  nonAdresse.every((c) => c.etat !== 'chevauchement')
+)
+verifier(
+  'un appareil sans canal declare n occupe rien non plus',
+  occupationUnivers([{ nom: 'NonPilote', canaux: 0, adresse: 12, univers: 1 }], 1).every(
+    (c) => c.etat === 'libre'
+  )
+)
+
+verifier(
+  'un appareil d un autre univers n apparait pas',
+  occupationUnivers([{ nom: 'A', canaux: 8, adresse: 1, univers: 2 }], 1).every(
+    (c) => c.etat === 'libre'
+  )
+)
+
+// Le depassement de fin d univers est deja signale par verifierPatch : la
+// carte n en montre que la partie qui existe, sans inventer un 513e canal.
+const deborde = occupationUnivers([{ nom: 'A', canaux: 16, adresse: 505, univers: 1 }], 1)
+verifier('un appareil qui deborde occupe jusqu au canal 512', deborde[511].etat === 'occupe')
+verifier('et la carte ne depasse pas 512 cases', deborde.length === CANAUX_PAR_UNIVERS)
+
+// La carte et la liste des problemes doivent s accorder.
+const patchSain = proposerPatch([
+  { nom: 'A', canaux: 8 },
+  { nom: 'B', canaux: 16 }
+])
+verifier(
+  'un patch sans probleme ne montre aucun chevauchement sur la carte',
+  verifierPatch(patchSain).length === 0 &&
+    occupationUnivers(patchSain, 1).every((c) => c.etat !== 'chevauchement')
+)
+verifier(
+  'un patch qui chevauche le montre aussi sur la carte',
+  verifierPatch(deuxAppareils).some((p) => p.code === 'chevauchement') &&
+    occupationUnivers(deuxAppareils, 1).some((c) => c.etat === 'chevauchement')
+)
+
+// La carte et plagesLibres comptent le meme vide.
+const libresSelonPlages = plagesLibres(deuxAppareils, 1).reduce(
+  (total, plage) => total + (plage.dernier - plage.premier + 1),
+  0
+)
+verifier(
+  'la carte et plagesLibres comptent le meme nombre de canaux libres',
+  carte.filter((c) => c.etat === 'libre').length === libresSelonPlages,
+  `${carte.filter((c) => c.etat === 'libre').length} contre ${libresSelonPlages}`
+)
 
 console.log(echecs === 0 ? '\nCALCUL DMX : TOUS LES TESTS PASSENT' : `\n${echecs} TEST(S) EN ECHEC`)
 process.exitCode = echecs === 0 ? 0 : 1

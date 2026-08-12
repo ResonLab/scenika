@@ -322,6 +322,70 @@ button.discret {
   margin: 0 0 0.3rem;
 }
 
+/* ── La carte des 512 canaux DMX ──────────────────────────────────────────
+   **La couleur ne porte jamais l'information seule.** Vert et rouge sont
+   indistinguables pour près d'un homme sur douze, et un plan de feu se lit
+   dans l'urgence : chaque état a donc aussi sa forme — creux, plein, barré. */
+.carte-dmx-grille {
+  display: grid;
+  /* 32 canaux par ligne : 512 = 16 lignes de 32, et l'oeil retrouve un canal
+     en comptant des blocs de 32, pas en comptant des cases. */
+  grid-template-columns: repeat(32, 1fr);
+  gap: 2px;
+  margin: 0.6rem 0;
+}
+
+.dmx-case {
+  aspect-ratio: 1;
+  border-radius: 2px;
+  min-width: 8px;
+}
+
+.dmx-case.libre {
+  /* Creux : un contour sans remplissage. */
+  background: transparent;
+  border: 1px solid var(--trait);
+}
+
+.dmx-case.occupe {
+  /* Plein. */
+  background: var(--ambre);
+  border: 1px solid var(--ambre);
+}
+
+.dmx-case.chevauchement {
+  /* Barré, en plus du rouge : c'est le seul état qui soit une faute, et il
+     doit rester reconnaissable sans la couleur. */
+  background: repeating-linear-gradient(
+    45deg,
+    var(--rouge),
+    var(--rouge) 2px,
+    #7a1f18 2px,
+    #7a1f18 4px
+  );
+  border: 1px solid var(--rouge);
+}
+
+.carte-dmx-legende {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  color: var(--discret);
+  font-size: 0.85rem;
+}
+
+.carte-dmx-legende .dmx-case {
+  width: 12px;
+  height: 12px;
+  aspect-ratio: auto;
+  margin-left: 0.6rem;
+}
+
+.carte-dmx-legende .dmx-case:first-child {
+  margin-left: 0;
+}
+
 /* ── Le plan de scène ─────────────────────────────────────────────────────
    Le plan est un cadre à proportions fixes et les appareils sont posés en
    pourcentage : c'est ce qui leur évite de dériver quand la fenêtre change

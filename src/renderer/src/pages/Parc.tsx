@@ -11,6 +11,7 @@ const VIDE: Omit<Materiel, 'id'> = {
   quantite: 1,
   puissanceW: 0,
   canauxDmx: 0,
+  modesDmx: '',
   emplacement: '',
   etat: 'bon',
   notes: ''
@@ -141,6 +142,14 @@ export default function Parc(): React.JSX.Element {
                 max="512"
                 value={nouveau.canauxDmx}
                 onChange={(e) => champ('canauxDmx', Number(e.target.value))}
+              />
+            </label>
+            <label>
+              {t('parc.modesDmx')}
+              <input
+                placeholder="8,12,16"
+                value={nouveau.modesDmx}
+                onChange={(e) => champ('modesDmx', e.target.value)}
               />
             </label>
             <label>

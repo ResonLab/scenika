@@ -20,6 +20,7 @@ interface LigneMateriel {
   quantite: number
   puissance_w: number
   canaux_dmx: number
+  modes_dmx: string
   emplacement: string
   etat: string
   notes: string
@@ -36,6 +37,7 @@ function versMateriel(ligne: LigneMateriel): Materiel {
     quantite: ligne.quantite,
     puissanceW: ligne.puissance_w,
     canauxDmx: ligne.canaux_dmx,
+    modesDmx: ligne.modes_dmx,
     emplacement: ligne.emplacement,
     etat: ligne.etat,
     notes: ligne.notes
@@ -62,6 +64,20 @@ function valider(materiel: Omit<Materiel, 'id'>): CleErreur | null {
   if (!Number.isInteger(materiel.canauxDmx) || materiel.canauxDmx < 0) return 'canauxNegatifs'
   // Un univers DMX porte 512 canaux : au-delà, l'appareil ne tiendrait dans aucun.
   if (materiel.canauxDmx > 512) return 'canauxTropGrands'
+  // Les autres modes suivent la même règle. Une saisie libre — « 8,12,16 » —
+  // se relit mieux qu'une liste de champs, mais elle doit être vérifiée : un
+  // mode à zéro donnerait un appareil qui n'occupe rien et se superposerait à
+  // son voisin sans que le contrôle de chevauchement le voie.
+  // `?? ''` parce que cette fiche peut venir du réseau : un poste resté à une
+  // version antérieure n'envoie pas ce champ, et il ne doit pas faire tomber
+  // le serveur. Absent veut dire « un seul mode », ce que dit déjà la base.
+  for (const morceau of (materiel.modesDmx ?? '').split(',')) {
+    const nu = morceau.trim()
+    if (nu === '') continue
+    const canaux = Number(nu)
+    if (!Number.isInteger(canaux) || canaux < 1) return 'modesMalEcrits'
+    if (canaux > 512) return 'canauxTropGrands'
+  }
   return null
 }
 
@@ -91,8 +107,8 @@ export function ajouterMateriel(materiel: Omit<Materiel, 'id'>): Materiel {
     .prepare(
       `INSERT INTO materiel
         (reference, designation, categorie, marque, modele, quantite, puissance_w,
-         canaux_dmx, emplacement, etat, notes)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+         canaux_dmx, modes_dmx, emplacement, etat, notes)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .run(
       materiel.reference.trim(),
@@ -103,6 +119,7 @@ export function ajouterMateriel(materiel: Omit<Materiel, 'id'>): Materiel {
       materiel.quantite,
       materiel.puissanceW,
       materiel.canauxDmx,
+      materiel.modesDmx,
       materiel.emplacement,
       materiel.etat,
       materiel.notes
@@ -119,7 +136,8 @@ export function modifierMateriel(materiel: Materiel): Materiel {
     .prepare(
       `UPDATE materiel SET
         reference = ?, designation = ?, categorie = ?, marque = ?, modele = ?,
-        quantite = ?, puissance_w = ?, canaux_dmx = ?, emplacement = ?, etat = ?, notes = ?
+        quantite = ?, puissance_w = ?, canaux_dmx = ?, modes_dmx = ?,
+        emplacement = ?, etat = ?, notes = ?
        WHERE id = ?`
     )
     .run(
@@ -131,6 +149,7 @@ export function modifierMateriel(materiel: Materiel): Materiel {
       materiel.quantite,
       materiel.puissanceW,
       materiel.canauxDmx,
+      materiel.modesDmx,
       materiel.emplacement,
       materiel.etat,
       materiel.notes,

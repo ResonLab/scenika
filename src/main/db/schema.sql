@@ -16,8 +16,13 @@ CREATE TABLE IF NOT EXISTS materiel (
   quantite INTEGER NOT NULL DEFAULT 1,
   -- Puissance électrique en watts, pour le calcul de charge des circuits.
   puissance_w REAL NOT NULL DEFAULT 0,
-  -- Nombre de canaux DMX du mode utilisé. 0 si l'appareil n'est pas piloté.
+  -- Nombre de canaux du mode habituel. 0 si l'appareil n'est pas piloté.
   canaux_dmx INTEGER NOT NULL DEFAULT 0,
+  -- Les autres modes du même appareil, en nombres de canaux séparés par des
+  -- virgules : « 8,12,16 ». Un même projecteur existe en plusieurs modes, et
+  -- le nombre de canaux dépend du mode choisi, pas du modèle. Vide = un seul
+  -- mode, celui de canaux_dmx.
+  modes_dmx TEXT NOT NULL DEFAULT '',
   emplacement TEXT NOT NULL DEFAULT '',
   etat TEXT NOT NULL DEFAULT 'bon',
   notes TEXT NOT NULL DEFAULT '',
@@ -102,6 +107,11 @@ CREATE TABLE IF NOT EXISTS scene_appareil (
   y REAL NOT NULL DEFAULT 0.5,
   univers INTEGER NOT NULL DEFAULT 1,
   adresse_dmx INTEGER NOT NULL DEFAULT 0,
+  -- **Le mode est propre à l'appareil posé, pas à la référence du parc.** Deux
+  -- projecteurs du même modèle peuvent tourner en 8 et en 16 canaux dans le
+  -- même spectacle ; c'est le mode réglé sur la machine qui décide de la place
+  -- qu'elle occupe dans l'univers. 0 = on reprend le mode habituel du parc.
+  canaux_dmx INTEGER NOT NULL DEFAULT 0,
   pose_le TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

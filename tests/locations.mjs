@@ -99,6 +99,7 @@ const lyre = ajouterMateriel({
   quantite: 8,
   puissanceW: 250,
   canauxDmx: 16,
+  modesDmx: '8,12,16',
   emplacement: '',
   etat: 'bon',
   notes: ''
@@ -112,6 +113,7 @@ const enceinte = ajouterMateriel({
   quantite: 4,
   puissanceW: 400,
   canauxDmx: 0,
+  modesDmx: '',
   emplacement: '',
   etat: 'bon',
   notes: ''

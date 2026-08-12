@@ -23,9 +23,11 @@ interface LigneScene {
   y: number
   univers: number
   adresse_dmx: number
+  canaux_dmx: number
   designation: string
   puissance_w: number
-  canaux_dmx: number
+  modes_dmx: string
+  canaux_reference: number
 }
 
 function versAppareil(ligne: LigneScene): AppareilScene {
@@ -37,11 +39,21 @@ function versAppareil(ligne: LigneScene): AppareilScene {
     y: ligne.y,
     univers: ligne.univers,
     adresseDmx: ligne.adresse_dmx,
+    // 0 veut dire « le mode habituel de la référence » : c'est ce que reçoit
+    // un appareil posé avant que les modes multiples existent, et c'est ce
+    // qu'on veut — pas un appareil qui cesse brusquement d'être piloté.
+    canauxDmx: ligne.canaux_dmx > 0 ? ligne.canaux_dmx : ligne.canaux_reference,
     designation: ligne.designation,
     puissanceW: ligne.puissance_w,
-    canauxDmx: ligne.canaux_dmx
+    modesDmx: ligne.modes_dmx
   }
 }
+
+const COLONNES_JOINTES = `scene_appareil.*,
+         materiel.designation,
+         materiel.puissance_w,
+         materiel.modes_dmx,
+         materiel.canaux_dmx AS canaux_reference`
 
 /**
  * Vérifie un appareil posé et rend **une clé**, pas une phrase.
@@ -49,7 +61,9 @@ function versAppareil(ligne: LigneScene): AppareilScene {
  * La position est bornée à [0, 1] : x et y sont des fractions du plan, et un
  * appareil posé à 1,4 disparaîtrait hors du cadre sans qu'on sache pourquoi.
  */
-function valider(appareil: Pick<AppareilScene, 'x' | 'y' | 'univers' | 'adresseDmx'>): CleErreur | null {
+function valider(
+  appareil: Pick<AppareilScene, 'x' | 'y' | 'univers' | 'adresseDmx' | 'canauxDmx'>
+): CleErreur | null {
   if (!(appareil.x >= 0 && appareil.x <= 1)) return 'positionHorsPlan'
   if (!(appareil.y >= 0 && appareil.y <= 1)) return 'positionHorsPlan'
   // 0 veut dire « pas encore adressé ». Au-delà de 512, l'adresse ne tient
@@ -57,11 +71,21 @@ function valider(appareil: Pick<AppareilScene, 'x' | 'y' | 'univers' | 'adresseD
   if (!Number.isInteger(appareil.adresseDmx) || appareil.adresseDmx < 0) return 'adresseInvalide'
   if (appareil.adresseDmx > 512) return 'adresseInvalide'
   if (!Number.isInteger(appareil.univers) || appareil.univers < 1) return 'adresseInvalide'
+  // 0 = on reprend le mode habituel de la référence. Un mode plus large qu'un
+  // univers entier ne tiendrait nulle part.
+  if (!Number.isInteger(appareil.canauxDmx) || appareil.canauxDmx < 0) return 'modeInvalide'
+  if (appareil.canauxDmx > 512) return 'modeInvalide'
+  // Une adresse posée doit laisser la place au mode : un appareil de 16 canaux
+  // adressé en 500 déborde de l'univers, et c'est exactement l'erreur qu'on
+  // découvre en salle.
+  if (appareil.adresseDmx > 0 && appareil.canauxDmx > 0) {
+    if (appareil.adresseDmx + appareil.canauxDmx - 1 > 512) return 'modeDebordeUnivers'
+  }
   return null
 }
 
 const REQUETE_LISTE = `
-  SELECT scene_appareil.*, materiel.designation, materiel.puissance_w, materiel.canaux_dmx
+  SELECT ${COLONNES_JOINTES}
     FROM scene_appareil
     JOIN materiel ON materiel.id = scene_appareil.materiel_id
    ORDER BY scene_appareil.univers, scene_appareil.adresse_dmx, scene_appareil.id`
@@ -74,7 +98,7 @@ export function listerScene(): AppareilScene[] {
 function relire(id: number): AppareilScene {
   const ligne = getDb()
     .prepare(
-      `SELECT scene_appareil.*, materiel.designation, materiel.puissance_w, materiel.canaux_dmx
+      `SELECT ${COLONNES_JOINTES}
          FROM scene_appareil
          JOIN materiel ON materiel.id = scene_appareil.materiel_id
         WHERE scene_appareil.id = ?`
@@ -85,7 +109,7 @@ function relire(id: number): AppareilScene {
 }
 
 export function poserAppareil(
-  appareil: Omit<AppareilScene, 'id' | 'designation' | 'puissanceW' | 'canauxDmx'>
+  appareil: Omit<AppareilScene, 'id' | 'designation' | 'puissanceW' | 'modesDmx'>
 ): AppareilScene {
   const erreur = valider(appareil)
   if (erreur) throw new Error(erreur)
@@ -95,8 +119,9 @@ export function poserAppareil(
 
   const resultat = getDb()
     .prepare(
-      `INSERT INTO scene_appareil (materiel_id, etiquette, x, y, univers, adresse_dmx)
-       VALUES (?, ?, ?, ?, ?, ?)`
+      `INSERT INTO scene_appareil
+        (materiel_id, etiquette, x, y, univers, adresse_dmx, canaux_dmx)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`
     )
     .run(
       appareil.materielId,
@@ -104,7 +129,8 @@ export function poserAppareil(
       appareil.x,
       appareil.y,
       appareil.univers,
-      appareil.adresseDmx
+      appareil.adresseDmx,
+      appareil.canauxDmx
     )
 
   return relire(Number(resultat.lastInsertRowid))
@@ -118,14 +144,18 @@ export function poserAppareil(
  * de ce qui était accroché où serait perdu.
  */
 export function deplacerAppareil(
-  appareil: Pick<AppareilScene, 'id' | 'etiquette' | 'x' | 'y' | 'univers' | 'adresseDmx'>
+  appareil: Pick<
+    AppareilScene,
+    'id' | 'etiquette' | 'x' | 'y' | 'univers' | 'adresseDmx' | 'canauxDmx'
+  >
 ): AppareilScene {
   const erreur = valider(appareil)
   if (erreur) throw new Error(erreur)
 
   const resultat = getDb()
     .prepare(
-      `UPDATE scene_appareil SET etiquette = ?, x = ?, y = ?, univers = ?, adresse_dmx = ?
+      `UPDATE scene_appareil
+          SET etiquette = ?, x = ?, y = ?, univers = ?, adresse_dmx = ?, canaux_dmx = ?
         WHERE id = ?`
     )
     .run(
@@ -134,6 +164,7 @@ export function deplacerAppareil(
       appareil.y,
       appareil.univers,
       appareil.adresseDmx,
+      appareil.canauxDmx,
       appareil.id
     )
 

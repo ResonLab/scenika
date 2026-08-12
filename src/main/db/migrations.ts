@@ -13,7 +13,13 @@ interface ColonneAttendue {
   definition: string
 }
 
-const COLONNES_ATTENDUES: ColonneAttendue[] = []
+const COLONNES_ATTENDUES: ColonneAttendue[] = [
+  // Les autres modes d'un même projecteur : « 8,12,16 ».
+  { table: 'materiel', colonne: 'modes_dmx', definition: "TEXT NOT NULL DEFAULT ''" },
+  // Le mode réellement réglé sur l'appareil posé, qui peut différer du mode
+  // habituel de la référence.
+  { table: 'scene_appareil', colonne: 'canaux_dmx', definition: 'INTEGER NOT NULL DEFAULT 0' }
+]
 
 function tableExiste(db: DatabaseSync, table: string): boolean {
   const ligne = db

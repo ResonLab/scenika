@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { proposerPatch, verifierPatch } from '../../../../commun/dmx.js'
-import type { AppareilScene, Materiel } from '../../../partage/types'
+import { modesDisponibles, type AppareilScene, type Materiel } from '../../../partage/types'
 import { t, traduireErreur } from '../../../partage/i18n'
+import CarteDmx from '../components/CarteDmx'
 
 /**
  * Le plan de scène.
@@ -51,6 +52,29 @@ export default function Scene(): React.JSX.Element {
     }
   }
 
+  /**
+   * Réenregistre un appareil en ne changeant que ce qu'on lui passe.
+   *
+   * **Sans ce raccourci, chaque modification devait recopier les six champs**,
+   * et il suffisait d'en oublier un pour remettre en silence une position ou un
+   * mode à une valeur périmée. C'est le genre de bug qui ne se voit qu'une fois
+   * la scène remise à plat.
+   */
+  function modifier(appareil: AppareilScene, changements: Partial<AppareilScene>): Promise<void> {
+    return agir(() =>
+      window.api.scene.deplacer({
+        id: appareil.id,
+        etiquette: appareil.etiquette,
+        x: appareil.x,
+        y: appareil.y,
+        univers: appareil.univers,
+        adresseDmx: appareil.adresseDmx,
+        canauxDmx: appareil.canauxDmx,
+        ...changements
+      })
+    )
+  }
+
   /** Convertit un point de l'écran en fraction du plan, borné à [0, 1]. */
   function fractionDuPlan(evenement: { clientX: number; clientY: number }): { x: number; y: number } {
     const cadre = plan.current?.getBoundingClientRect()
@@ -75,7 +99,10 @@ export default function Scene(): React.JSX.Element {
         x,
         y,
         univers: 1,
-        adresseDmx: 0
+        adresseDmx: 0,
+        // Le mode habituel de la référence ; il se change ensuite appareil par
+        // appareil, parce que c'est le réglage de la machine qui décide.
+        canauxDmx: materiel.canauxDmx
       })
     )
   }
@@ -88,16 +115,7 @@ export default function Scene(): React.JSX.Element {
     if (!appareil) return
     const { x, y } = fractionDuPlan(evenement)
 
-    agir(() =>
-      window.api.scene.deplacer({
-        id: appareil.id,
-        etiquette: appareil.etiquette,
-        x,
-        y,
-        univers: appareil.univers,
-        adresseDmx: appareil.adresseDmx
-      })
-    )
+    modifier(appareil, { x, y })
   }
 
   /**
@@ -125,7 +143,8 @@ export default function Scene(): React.JSX.Element {
           x: appareil.x,
           y: appareil.y,
           univers: propose.univers,
-          adresseDmx: propose.adresse
+          adresseDmx: propose.adresse,
+          canauxDmx: appareil.canauxDmx
         })
       }
       await recharger()
@@ -136,19 +155,28 @@ export default function Scene(): React.JSX.Element {
     }
   }
 
-  const problemes = useMemo(
+  // Les appareils adressés, sous la forme qu'attend `commun/dmx.js`. La liste
+  // sert **à la fois** au contrôle du patch et à la carte : deux préparations
+  // séparées finiraient par se contredire d'un appareil.
+  const patch = useMemo(
     () =>
-      verifierPatch(
-        poses
-          .filter((a) => a.canauxDmx > 0 && a.adresseDmx > 0)
-          .map((a) => ({
-            nom: a.etiquette || a.designation,
-            canaux: a.canauxDmx,
-            adresse: a.adresseDmx,
-            univers: a.univers
-          }))
-      ),
+      poses
+        .filter((a) => a.canauxDmx > 0 && a.adresseDmx > 0)
+        .map((a) => ({
+          nom: a.etiquette || a.designation,
+          canaux: a.canauxDmx,
+          adresse: a.adresseDmx,
+          univers: a.univers
+        })),
     [poses]
+  )
+
+  const problemes = useMemo(() => verifierPatch(patch), [patch])
+
+  /** Les univers réellement employés, pour n'afficher que des cartes utiles. */
+  const universUtilises = useMemo(
+    () => [...new Set(patch.map((a) => a.univers))].sort((a, b) => a - b),
+    [patch]
   )
 
   const puissanceTotale = poses.reduce((total, a) => total + a.puissanceW, 0)
@@ -254,41 +282,35 @@ export default function Scene(): React.JSX.Element {
             {t('scene.etiquette')}
             <input
               value={selection.etiquette}
-              onChange={(e) =>
-                agir(() =>
-                  window.api.scene.deplacer({
-                    id: selection.id,
-                    etiquette: e.target.value,
-                    x: selection.x,
-                    y: selection.y,
-                    univers: selection.univers,
-                    adresseDmx: selection.adresseDmx
-                  })
-                )
-              }
+              onChange={(e) => modifier(selection, { etiquette: e.target.value })}
             />
           </label>
 
           {selection.canauxDmx > 0 && (
             <>
               <label>
+                {t('scene.mode')}
+                <select
+                  value={selection.canauxDmx}
+                  onChange={(e) => modifier(selection, { canauxDmx: Number(e.target.value) })}
+                >
+                  {modesDisponibles({
+                    canauxDmx: selection.canauxDmx,
+                    modesDmx: selection.modesDmx
+                  }).map((canaux) => (
+                    <option key={canaux} value={canaux}>
+                      {t('scene.modeCanaux', { canaux })}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
                 {t('scene.univers')}
                 <input
                   type="number"
                   min="1"
                   value={selection.univers}
-                  onChange={(e) =>
-                    agir(() =>
-                      window.api.scene.deplacer({
-                        id: selection.id,
-                        etiquette: selection.etiquette,
-                        x: selection.x,
-                        y: selection.y,
-                        univers: Number(e.target.value),
-                        adresseDmx: selection.adresseDmx
-                      })
-                    )
-                  }
+                  onChange={(e) => modifier(selection, { univers: Number(e.target.value) })}
                 />
               </label>
               <label>
@@ -298,18 +320,7 @@ export default function Scene(): React.JSX.Element {
                   min="0"
                   max="512"
                   value={selection.adresseDmx}
-                  onChange={(e) =>
-                    agir(() =>
-                      window.api.scene.deplacer({
-                        id: selection.id,
-                        etiquette: selection.etiquette,
-                        x: selection.x,
-                        y: selection.y,
-                        univers: selection.univers,
-                        adresseDmx: Number(e.target.value)
-                      })
-                    )
-                  }
+                  onChange={(e) => modifier(selection, { adresseDmx: Number(e.target.value) })}
                 />
               </label>
             </>
@@ -329,7 +340,16 @@ export default function Scene(): React.JSX.Element {
         </div>
       )}
 
-      {poses.some((a) => a.canauxDmx > 0 && a.adresseDmx > 0) && (
+      {universUtilises.map((numero) => (
+        <div key={numero} className="carte">
+          <h2>
+            {t('carteDmx.titre')} — {t('scene.universCourt')} {numero}
+          </h2>
+          <CarteDmx appareils={patch} univers={numero} />
+        </div>
+      ))}
+
+      {patch.length > 0 && (
         <div className="carte">
           <h2>{t('scene.problemesPatch')}</h2>
           {problemes.length === 0 ? (

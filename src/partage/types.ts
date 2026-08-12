@@ -39,6 +39,9 @@ export type CleErreur =
   | 'materielIntrouvable'
   | 'positionHorsPlan'
   | 'adresseInvalide'
+  | 'modeInvalide'
+  | 'modeDebordeUnivers'
+  | 'modesMalEcrits'
 
 export interface Materiel {
   id: number
@@ -50,8 +53,14 @@ export interface Materiel {
   quantite: number
   /** Puissance électrique en watts, pour le calcul de charge des circuits. */
   puissanceW: number
-  /** Canaux DMX du mode utilisé. 0 si l'appareil n'est pas piloté. */
+  /** Canaux du mode habituel. 0 si l'appareil n'est pas piloté. */
   canauxDmx: number
+  /**
+   * Les autres modes du même appareil, en canaux séparés par des virgules :
+   * « 8,12,16 ». Un même projecteur existe en plusieurs modes, et le nombre de
+   * canaux dépend du mode choisi, pas du modèle. Vide = un seul mode.
+   */
+  modesDmx: string
   emplacement: string
   etat: string
   notes: string
@@ -115,6 +124,24 @@ export interface Disponibilite {
   disponible: number
 }
 
+/**
+ * Les modes d'un appareil, du plus petit au plus grand, sans doublon.
+ *
+ * Le mode habituel en fait toujours partie : une liste qui ne contiendrait pas
+ * le mode réglé par défaut proposerait de choisir tout sauf ce qui est en
+ * place.
+ */
+export function modesDisponibles(materiel: Pick<Materiel, 'canauxDmx' | 'modesDmx'>): number[] {
+  const declares = materiel.modesDmx
+    .split(',')
+    .map((morceau) => Number(morceau.trim()))
+    .filter((canaux) => Number.isInteger(canaux) && canaux > 0)
+
+  const tous = new Set(declares)
+  if (materiel.canauxDmx > 0) tous.add(materiel.canauxDmx)
+  return [...tous].sort((a, b) => a - b)
+}
+
 /** Une prise d'un tableau électrique, avec son propre calibre. */
 export interface PriseTableau {
   id: number
@@ -154,10 +181,17 @@ export interface AppareilScene {
   y: number
   univers: number
   adresseDmx: number
-  /* Repris du parc pour l'affichage : désignation, puissance et canaux. */
+  /**
+   * Le mode réglé sur **cet** appareil-ci, en canaux. Deux projecteurs du même
+   * modèle peuvent tourner en 8 et en 16 dans le même spectacle, et c'est le
+   * mode réglé sur la machine qui décide de la place qu'elle occupe.
+   */
+  canauxDmx: number
+  /* Repris du parc pour l'affichage. */
   designation: string
   puissanceW: number
-  canauxDmx: number
+  /** Les modes que la référence propose, pour changer celui-ci. */
+  modesDmx: string
 }
 
 /** Une ligne prête à être facturée par Ohmnia. */
