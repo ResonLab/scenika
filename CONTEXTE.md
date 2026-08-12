@@ -8,17 +8,27 @@
 
 | | |
 |---|---|
-| **Parc matériel** | écrit |
+| **Parc matériel** | écrit — avec les modes DMX multiples d'un même projecteur |
 | **Locations** | écrit — avec la disponibilité calculée et ce qui n'est pas revenu |
+| **Plan de scène** | écrit — on pose les projecteurs, on voit adresse et puissance |
+| **Tableaux électriques** | écrit — prises réelles, disjoncteur de tête, répartition automatique |
 | **Puissance** | écrit — répartition sur les circuits, à partir des watts du parc |
-| **Calculateur DMX** | écrit, relié au parc ; page publique gratuite bilingue |
+| **Calculateur DMX** | écrit, relié au parc ; carte des 512 canaux ; page publique gratuite bilingue |
 
 **Français et anglais** dans toute l'application (115 clés). **Multi-postes** par
 Nexika, éprouvé par le réseau. **Conditions d'utilisation** avec écran
 d'acceptation. Publiée en 0.1.0 pour Windows et Linux — mais **cette release est
 antérieure à tout ce qui précède** : il faut une 0.2.0.
 
-`npm run verifier` : typecheck + 7 suites.
+`npm run verifier` : typecheck + 9 suites.
+
+**Un bug à ne jamais réintroduire, trouvé en lançant l'application et pas en la
+relisant :** `.conditions-texte` n'avait aucune règle CSS. La zone n'était donc
+pas une boîte à défilement, son `onScroll` ne se déclenchait jamais, la case
+d'acceptation ne s'activait plus — et **l'application ne démarrait plus du
+tout**. Le mécanisme existait dans le code et était inatteignable à l'écran.
+`tests/coherence-conditions.mjs` exige désormais `max-height` et `overflow-y`,
+et qu'un texte tenant sans défiler compte comme lu.
 
 ```bash
 cd Scenika && npm install && npm run dev
@@ -256,6 +266,40 @@ et de numérotation.
 vrai : assistant de mise en service, HTTPS sur le réseau, session, ajout de
 matériel et lecture des disponibilités **par le réseau**, 401 sans jeton.
 
+**✔ Le plan de scène.** On pose les projecteurs du parc sur un plan, on les
+déplace à la souris, et chacun montre son adresse DMX et sa puissance. **Ce que
+le plan apporte et qu'une feuille de patch ne donne pas : où.** Un tableau dit
+qu'un appareil est en 145 ; il ne dit pas qu'il est le voisin de celui qui
+partage sa prise. Les positions sont des **fractions du plan**, jamais des
+pixels : en pixels, tous les projecteurs dériveraient au changement d'écran.
+
+**✔ Les tableaux électriques et leur répartition** (`commun/tableaux.js`). Un
+tableau a des prises, chacune avec son calibre, **et un disjoncteur de tête**.
+Les deux limitent, et c'est le second qu'on oublie : six prises de 16 A
+derrière un général de 32 A ne donnent pas 96 A. Un général à 0 veut dire « non
+déclaré » — le calcul n'invente alors aucune limite plutôt que d'en supposer
+une fausse.
+
+**La différence avec l'écran Puissance est le cœur du sujet** : celui-ci répond
+à « de combien de circuits ai-je besoin ? » en inventant autant de circuits
+identiques qu'il en faut ; celui-là répond à « avec les tableaux que j'ai devant
+moi, est-ce que ça rentre ? ». Même règle que `puissance.js` — le plus gourmand
+d'abord, la première prise qui l'accepte — et **la même marge de charge**, pas
+une seconde. Rien n'est casé de force : « trop gourmand » et « plus de place »
+sont distingués, parce qu'ils appellent des gestes différents.
+
+**✔ Les modes DMX multiples.** C'était le piège annoncé au §5 et il est levé.
+Le mode appartient à **l'appareil posé**, pas à la référence : deux projecteurs
+du même modèle peuvent tourner en 8 et en 16 dans le même spectacle. Le ranger
+sur la référence ferait bouger l'un en réglant l'autre.
+
+**✔ La carte des 512 canaux** (`occupationUnivers` dans `commun/dmx.js`). Creux
+pour libre, plein pour occupé, hachuré rouge pour chevauchement. **La couleur
+ne porte jamais l'information seule** : vert et rouge sont indistinguables pour
+près d'un homme sur douze, et un plan de feu se lit dans l'urgence. Un test
+vérifie que la carte, `verifierPatch` et `plagesLibres` s'accordent — trois
+affichages du même patch qui se contredisent, c'est pire qu'un seul.
+
 **À faire : la page web de consultation mobile**, servie par Nexika sur le
 réseau local. Elle était « décidée, reportée » faute de serveur ; **le serveur
 tourne maintenant**, donc c'est du travail réel.
@@ -324,6 +368,8 @@ calcul doit le dire au lieu de produire un patch impossible.
 
 **Le même modèle de projecteur existe en plusieurs modes.** Le nombre de canaux
 dépend du mode choisi, pas seulement du modèle. Le stocker par appareil.
+**Fait** : `materiel.modes_dmx` porte les modes possibles, et
+`scene_appareil.canaux_dmx` celui qui est réglé sur cette machine-ci.
 
 **La puissance n'est pas qu'une addition.** Un circuit 16 A en 230 V tient environ
 3 600 W en théorie, moins en pratique. Prévoir une marge et l'afficher. Ne jamais
