@@ -45,11 +45,18 @@ body {
   display: block;
 }
 
+/* Le carre de couleur qui tenait lieu de logo dans le menu a ete remplace par
+   la marque elle-meme — voir components/LogoScenika.tsx. La regle reste : la
+   pastille sert encore ailleurs comme reperage de couleur. */
 .pastille {
   width: 28px;
   height: 28px;
   border-radius: 8px;
   background: linear-gradient(135deg, var(--ambre), var(--orange));
+  flex: none;
+}
+
+.menu-entete svg {
   flex: none;
 }
 

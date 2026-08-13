@@ -7,6 +7,7 @@ import Scene from './pages/Scene'
 import Tableaux from './pages/Tableaux'
 import { definirLangue, LANGUES, t, type Langue } from '../../partage/i18n'
 import ConditionsUtilisation from './components/ConditionsUtilisation'
+import LogoScenika from './components/LogoScenika'
 import { VERSION_CONDITIONS } from '../../partage/conditions'
 
 const MODULES = [
@@ -102,7 +103,7 @@ export default function App(): React.JSX.Element {
     <div className="app">
       <aside className="menu">
         <div className="menu-entete">
-          <span className="pastille" />
+          <LogoScenika taille={30} />
           <div>
             <strong>Scenika</strong>
             <span className="discret">{t('menu.sousTitre')}</span>
