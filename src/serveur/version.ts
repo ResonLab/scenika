@@ -6,4 +6,4 @@
  * n'a pas dérivé — sinon on livrerait un serveur qui s'annonce sous un numéro
  * qui n'est plus le sien.
  */
-export const VERSION_SERVEUR = '0.2.0'
+export const VERSION_SERVEUR = '0.3.0'
