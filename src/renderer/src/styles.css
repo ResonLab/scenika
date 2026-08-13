@@ -473,3 +473,32 @@ button.discret {
 .scene-appareil span {
   color: var(--discret);
 }
+
+/* ── Les écarts entre adresses DMX ────────────────────────────────────────
+   Chaque écart est une pastille. Celui qui sort du rang est bordé de rouge :
+   c'est le seul qu'on cherche, parce que c'est lui qui interdit une saisie en
+   série dans la console et oblige à adresser appareil par appareil.
+
+   La classe est posée par `CalculateurDmx.tsx`. Sans règle ici, le mécanisme
+   existerait dans le code et resterait invisible à l'écran — c'est exactement
+   ce qui avait rendu l'écran des conditions inatteignable. */
+.suite-ecarts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0.35rem 0 1rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85rem;
+}
+
+.suite-ecarts span {
+  border: 1px solid var(--trait, rgba(255, 255, 255, 0.14));
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+  opacity: 0.75;
+}
+
+.suite-ecarts span.rompu {
+  border-color: #ff6b5e;
+  opacity: 1;
+}

@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
-import { plageOccupee, plagesLibres, proposerPatch, verifierPatch } from '../../../../commun/dmx.js'
+import {
+  ecartsAdresses,
+  plageOccupee,
+  plagesLibres,
+  proposerPatch,
+  verifierPatch
+} from '../../../../commun/dmx.js'
 import type { Materiel } from '../../../partage/types'
 import { t, type CleTraduction } from '../../../partage/i18n'
 import CarteDmx from '../components/CarteDmx'
@@ -42,6 +48,11 @@ function decrireProbleme(probleme: {
 export default function CalculateurDmx(): React.JSX.Element {
   const [parc, setParc] = useState<Materiel[]>([])
   const [quantites, setQuantites] = useState<Record<number, number>>({})
+  const [premierUnivers, setPremierUnivers] = useState(1)
+  const [premiereAdresse, setPremiereAdresse] = useState(1)
+  const [nombreUnivers, setNombreUnivers] = useState(1)
+  /** L'univers imposé, matériel par matériel. Vide = laisser le calcul décider. */
+  const [universImpose, setUniversImpose] = useState<Record<number, number | ''>>({})
 
   useEffect(() => {
     window.api.parc.lister().then((liste) => setParc(liste.filter((m) => m.canauxDmx > 0)))
@@ -55,21 +66,27 @@ export default function CalculateurDmx(): React.JSX.Element {
           Array.from({ length: quantites[m.id] }, (_, i) => ({
             nom: `${m.designation} ${i + 1}`,
             canaux: m.canauxDmx,
-            puissanceW: m.puissanceW
+            puissanceW: m.puissanceW,
+            // `undefined` et non `null` : le module teste un entier, et un
+            // univers absent doit se comporter comme s'il n'avait pas été écrit.
+            univers: typeof universImpose[m.id] === 'number' ? (universImpose[m.id] as number) : undefined
           }))
         ),
-    [parc, quantites]
+    [parc, quantites, universImpose]
   )
 
   const resultat = useMemo(() => {
     if (selection.length === 0) return null
     try {
-      const patch = proposerPatch(selection)
+      const patch = proposerPatch(selection, premierUnivers, premiereAdresse)
       return { patch, problemes: verifierPatch(patch), erreur: null as string | null }
     } catch (e) {
+      // Un univers imposé et plein, une adresse de départ hors univers : le
+      // module refuse et nomme la cause. On la montre telle quelle plutôt que
+      // de replier sur un patch approchant, qui serait faux au bout du câble.
       return { patch: [], problemes: [], erreur: (e as Error).message }
     }
-  }, [selection])
+  }, [selection, premierUnivers, premiereAdresse])
 
   const puissanceTotale = selection.reduce((total, a) => total + a.puissanceW, 0)
   const circuits = Math.ceil(puissanceTotale / (PUISSANCE_CIRCUIT_16A * TAUX_CHARGE_MAX))
@@ -93,6 +110,7 @@ export default function CalculateurDmx(): React.JSX.Element {
                 <th>{t('parc.puissanceCourt')}</th>
                 <th>{t('dmx.enStock')}</th>
                 <th>{t('parc.quantite')}</th>
+                <th>{t('dmx.univers')}</th>
               </tr>
             </thead>
             <tbody>
@@ -117,10 +135,65 @@ export default function CalculateurDmx(): React.JSX.Element {
                       }
                     />
                   </td>
+                  <td>
+                    <select
+                      value={universImpose[m.id] ?? ''}
+                      onChange={(e) =>
+                        setUniversImpose((p) => ({
+                          ...p,
+                          [m.id]: e.target.value === '' ? '' : Number(e.target.value)
+                        }))
+                      }
+                    >
+                      <option value="">{t('dmx.universAuto')}</option>
+                      {Array.from({ length: nombreUnivers }, (_, i) => premierUnivers + i).map(
+                        (n) => (
+                          <option key={n} value={n}>
+                            {n}
+                          </option>
+                        )
+                      )}
+                    </select>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+
+          <h2>{t('dmx.reglages')}</h2>
+          <div className="ligne-formulaire">
+            <label>
+              {t('dmx.premierUnivers')}
+              <input
+                type="number"
+                min="1"
+                max="64"
+                value={premierUnivers}
+                onChange={(e) => setPremierUnivers(Math.max(1, Number(e.target.value) || 1))}
+              />
+            </label>
+            <label>
+              {t('dmx.premiereAdresse')}
+              <input
+                type="number"
+                min="1"
+                max="512"
+                value={premiereAdresse}
+                onChange={(e) => setPremiereAdresse(Math.max(1, Number(e.target.value) || 1))}
+              />
+            </label>
+            <label>
+              {t('dmx.nombreUnivers')}
+              <input
+                type="number"
+                min="1"
+                max="64"
+                value={nombreUnivers}
+                onChange={(e) => setNombreUnivers(Math.max(1, Number(e.target.value) || 1))}
+              />
+            </label>
+          </div>
+          <p className="avertissement">{t('dmx.aideDepart')}</p>
         </div>
       )}
 
@@ -192,6 +265,47 @@ export default function CalculateurDmx(): React.JSX.Element {
                 })}
               </tbody>
             </table>
+          </div>
+
+          <div className="carte">
+            <h2>{t('dmx.ecartsTitre')}</h2>
+            <p className="avertissement">{t('dmx.ecartsAide')}</p>
+            {/* Le calcul vient de `ecartsAdresses`, dans le module partagé.
+                Le refaire ici donnerait un pas pouvant contredire la carte
+                affichée juste en dessous. */}
+            {ecartsAdresses(resultat.patch).map((groupe) => (
+              <div key={groupe.univers}>
+                <p>
+                  {t('dmx.univers')} {groupe.univers} :{' '}
+                  {groupe.pas !== null
+                    ? t('dmx.pasConstant', {
+                        nombre: groupe.adresses.length,
+                        debut: String(groupe.adresses[0]).padStart(3, '0'),
+                        pas: groupe.pas
+                      })
+                    : groupe.adresses.length < 2
+                      ? t('dmx.pasUnique', {
+                          debut: String(groupe.adresses[0]).padStart(3, '0')
+                        })
+                      : t('dmx.pasRompu')}
+                </p>
+                {groupe.ecarts.length > 0 && (
+                  <p className="suite-ecarts">
+                    {groupe.ecarts.map((ecart, index) => (
+                      <span
+                        key={index}
+                        className={ecart === groupe.ecarts[0] ? '' : 'rompu'}
+                        title={`${String(groupe.adresses[index]).padStart(3, '0')} → ${String(
+                          groupe.adresses[index + 1]
+                        ).padStart(3, '0')}`}
+                      >
+                        +{ecart}
+                      </span>
+                    ))}
+                  </p>
+                )}
+              </div>
+            ))}
           </div>
 
           <div className="carte">

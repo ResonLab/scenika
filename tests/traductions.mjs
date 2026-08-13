@@ -125,7 +125,11 @@ for (const chemin of fichiersTs(join(RACINE, 'src/renderer'))) {
   let dansCommentaire = false
   contenu.split('\n').forEach((ligne, index) => {
     const nue = ligne.trim()
-    if (nue.startsWith('/*')) dansCommentaire = true
+    // `{/*` ouvre un commentaire JSX. Ne reconnaître que `/*` laissait passer
+    // tout le bloc : les apostrophes du texte y formaient de fausses chaînes,
+    // et le contrôle accusait un commentaire d'être du français en dur. **Un
+    // faux échec use un contrôle aussi sûrement qu'un faux succès.**
+    if (nue.startsWith('/*') || nue.startsWith('{/*')) dansCommentaire = true
     if (dansCommentaire) {
       if (nue.includes('*/')) dansCommentaire = false
       return
@@ -138,6 +142,57 @@ for (const chemin of fichiersTs(join(RACINE, 'src/renderer'))) {
       if (ACCENTS.test(texte)) {
         echec(`${etiquette}:${index + 1} — texte français en dur : « ${texte.trim()} »`)
       }
+    }
+
+    /**
+     * **Les chaînes littérales**, les trois délimiteurs compris.
+     *
+     * Le contrôle ci-dessus ne regarde que le texte entre balises. Il ne peut
+     * donc pas voir un `placeholder="Rechercher…"`, un `alert('Créé.')`, un
+     * `title=`, un ternaire `{paye ? 'Payée' : 'En attente'}` ni un gabarit
+     * `` `${nb} lignes ajoutées` `` — c'est-à-dire une bonne part du texte
+     * qu'un utilisateur lit vraiment.
+     *
+     * **Ce n'était pas un contrôle incapable d'échouer** : il échouait très
+     * bien sur ce qu'il regardait. C'est la forme plus sournoise — une
+     * vérification dont on a étendu la confiance au-delà de son champ. Portée
+     * depuis Ohmnia le 13 août 2026, où elle a révélé des textes français dans
+     * des écrans déclarés traduits.
+     */
+    const litteraux = [...ligne.matchAll(/(['"`])((?:[^\\\n]|\\.)*?)\1/g)].map((m) => m[2])
+    for (const texte of litteraux) {
+      if (ACCENTS.test(texte)) {
+        echec(`${etiquette}:${index + 1} — chaîne française en dur : « ${texte.trim()} »`)
+      }
+    }
+
+    /**
+     * **Et le texte seul sur sa ligne**, entre deux balises écrites sur des
+     * lignes différentes — la mise en forme normale d'un libellé de champ :
+     *
+     * ```jsx
+     * <label>
+     *   Entretien du véhicule ({symbole()}/km)
+     *   <input … />
+     * </label>
+     * ```
+     *
+     * Ni entre `>` et `<` sur la même ligne, ni entre guillemets : les deux
+     * contrôles ci-dessus passaient à côté du cas le plus fréquent.
+     */
+    const estDuCode =
+      nue.startsWith('<') ||
+      nue.startsWith('{') ||
+      nue.startsWith('}') ||
+      nue.endsWith(',') ||
+      nue.endsWith(';') ||
+      nue.endsWith('=>') ||
+      /^[\w$]+[=:]/.test(nue) ||
+      /^[\w$.]+\s*\(/.test(nue) ||
+      /[=;{}()[\]]/.test(nue.replace(/\([^)]*\)/g, ''))
+
+    if (!estDuCode && ACCENTS.test(nue) && nue.length >= 3) {
+      echec(`${etiquette}:${index + 1} — texte français seul sur sa ligne : « ${nue} »`)
     }
   })
 }

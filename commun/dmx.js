@@ -197,15 +197,47 @@ export function verifierPatch(appareils) {
  * remplissage optimal quand on cherche un appareil sur scène à minuit.
  */
 /**
- * @param {{ nom: string, canaux: number }[]} appareils
+ * **L'adresse de départ et l'univers imposé.**
+ *
+ * `premiereAdresse` sert au cas courant qu'on ne peut pas contourner : les
+ * premiers canaux d'un univers sont souvent déjà pris par du matériel absent de
+ * la liste — un bloc de gradateurs, une machine à fumée câblée en dur, un
+ * pupitre. Sans elle, il fallait inventer un faux appareil pour réserver la
+ * place, et ce faux appareil se retrouvait sur la feuille de patch.
+ *
+ * Un appareil peut porter un `univers` : il y est alors **placé de force** et ne
+ * participe pas au débordement automatique. C'est ce qui permet de dire « les
+ * lyres sur l'univers 2, quoi qu'il arrive » — une décision de câblage, que le
+ * calcul n'a pas à défaire.
+ *
+ * Chaque univers garde son propre curseur. Sans cela, épingler un appareil sur
+ * l'univers 2 puis revenir au 1 réécrirait par-dessus ce qu'on venait d'y poser.
+ */
+/**
+ * @param {{ nom: string, canaux: number, univers?: number }[]} appareils
  * @param {number} [premierUnivers]
+ * @param {number} [premiereAdresse]
  * @returns {Appareil[]}
  */
-export function proposerPatch(appareils, premierUnivers = 1) {
+export function proposerPatch(appareils, premierUnivers = 1, premiereAdresse = 1) {
+  if (!Number.isInteger(premiereAdresse) || premiereAdresse < 1) {
+    throw new Error(`L'adresse de départ doit être un entier d'au moins 1.`)
+  }
+  if (premiereAdresse > CANAUX_PAR_UNIVERS) {
+    throw new Error(
+      `L'adresse de départ ${premiereAdresse} dépasse l'univers : il n'y a que ` +
+        `${CANAUX_PAR_UNIVERS} canaux.`
+    )
+  }
+
   /** @type {Appareil[]} */
   const proposition = []
-  let univers = premierUnivers
-  let prochaine = 1
+  /** La prochaine adresse libre, univers par univers. @type {Map<number, number>} */
+  const curseurs = new Map()
+  const curseur = (univers) =>
+    curseurs.get(univers) ?? (univers === premierUnivers ? premiereAdresse : 1)
+
+  let universCourant = premierUnivers
 
   for (const appareil of appareils) {
     if (!Number.isInteger(appareil.canaux) || appareil.canaux < 1) {
@@ -218,9 +250,24 @@ export function proposerPatch(appareils, premierUnivers = 1) {
       )
     }
 
+    const impose = Number.isInteger(appareil.univers) && Number(appareil.univers) >= 1
+    let univers = impose ? Number(appareil.univers) : universCourant
+    let prochaine = curseur(univers)
+
     if (prochaine + appareil.canaux - 1 > CANAUX_PAR_UNIVERS) {
-      univers += 1
-      prochaine = 1
+      if (impose) {
+        // Un univers imposé et plein : on le dit, on ne déplace pas l'appareil
+        // ailleurs en silence. Le technicien a demandé cet univers-là, et le
+        // déplacer sans rien dire donnerait un patch juste sur le papier et faux
+        // au bout du câble.
+        throw new Error(
+          `« ${appareil.nom} » ne tient plus dans l'univers ${univers} : il n'y reste pas ` +
+            `${appareil.canaux} canaux d'affilée à partir de ${prochaine}.`
+        )
+      }
+      universCourant += 1
+      univers = universCourant
+      prochaine = curseur(univers)
     }
 
     proposition.push({
@@ -229,10 +276,59 @@ export function proposerPatch(appareils, premierUnivers = 1) {
       adresse: prochaine,
       univers
     })
-    prochaine += appareil.canaux
+    curseurs.set(univers, prochaine + appareil.canaux)
   }
 
   return proposition
+}
+
+/**
+ * L'écart entre les adresses successives d'un patch, univers par univers.
+ *
+ * **C'est ce qu'on tape dans une console.** La plupart proposent un patch en
+ * série : « N appareils, première adresse A, pas P ». Si l'écart est constant,
+ * la saisie tient en une ligne ; s'il ne l'est pas, il faut adresser appareil
+ * par appareil — et mieux vaut le savoir avant d'être en haut de l'échelle.
+ *
+ * **L'écart n'est pas toujours le nombre de canaux.** Deux appareils collés ont
+ * un écart égal à leur mode, mais un trou laissé en fin d'univers, une adresse
+ * de départ décalée ou des modes différents le rompent. C'est précisément ce
+ * qu'on ne peut pas deviner en lisant la liste.
+ */
+/**
+ * @typedef {object} EcartUnivers
+ * @property {number} univers
+ * @property {number[]} adresses Les adresses, dans l'ordre croissant.
+ * @property {number[]} ecarts Les écarts successifs ; il y en a un de moins.
+ * @property {number | null} pas L'écart s'il est constant, sinon `null`.
+ */
+
+/**
+ * @param {Appareil[]} appareils
+ * @returns {EcartUnivers[]}
+ */
+export function ecartsAdresses(appareils) {
+  /** @type {Map<number, number[]>} */
+  const parUnivers = new Map()
+  for (const appareil of appareils) {
+    if (!(appareil.canaux >= 1) || !(appareil.adresse >= 1)) continue
+    const liste = parUnivers.get(appareil.univers) ?? []
+    liste.push(appareil.adresse)
+    parUnivers.set(appareil.univers, liste)
+  }
+
+  /** @type {EcartUnivers[]} */
+  const resultat = []
+  for (const [univers, brutes] of [...parUnivers].sort((a, b) => a[0] - b[0])) {
+    const adresses = [...brutes].sort((a, b) => a - b)
+    const ecarts = adresses.slice(1).map((adresse, index) => adresse - adresses[index])
+    // Un seul appareil n'a pas d'écart, et n'en a pas besoin : `pas` reste nul
+    // plutôt que d'annoncer un pas inventé à partir de rien.
+    const pas = ecarts.length > 0 && ecarts.every((e) => e === ecarts[0]) ? ecarts[0] : null
+    resultat.push({ univers, adresses, ecarts, pas })
+  }
+
+  return resultat
 }
 
 /**

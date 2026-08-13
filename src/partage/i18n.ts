@@ -293,6 +293,32 @@ const TEXTES = {
   'dmx.occupe': { fr: 'Occupe', en: 'Occupies' },
   'dmx.puissanceAppelee': { fr: 'puissance appelée', en: 'power drawn' },
   'dmx.circuitsMin': { fr: 'circuits 16 A minimum', en: '16 A circuits minimum' },
+  'dmx.reglages': { fr: 'Où commence le patch', en: 'Where the patch starts' },
+  'dmx.premierUnivers': { fr: 'Premier univers', en: 'First universe' },
+  'dmx.premiereAdresse': { fr: 'Adresse de départ', en: 'Start address' },
+  'dmx.nombreUnivers': { fr: "Nombre d'univers", en: 'Number of universes' },
+  'dmx.universAuto': { fr: 'Automatique', en: 'Automatic' },
+  'dmx.aideDepart': {
+    fr: "L'adresse de départ sert quand les premiers canaux sont déjà pris par du matériel absent de cette liste — un bloc de gradateurs, une machine câblée en dur. Un appareil dont l'univers est choisi y reste, quoi qu'il arrive.",
+    en: 'The start address is for when the first channels are already taken by gear that is not in this list — a dimmer rack, a machine wired in permanently. A fixture whose universe is chosen stays there, whatever happens.'
+  },
+  'dmx.ecartsTitre': { fr: 'Les écarts entre adresses', en: 'The gaps between addresses' },
+  'dmx.ecartsAide': {
+    fr: "Ce qu'on tape dans une console : N appareils, première adresse A, pas P. Si l'écart est constant, la saisie tient en une ligne. Sinon, il faut adresser appareil par appareil — et mieux vaut le savoir avant d'être en haut de l'échelle.",
+    en: 'What you type into a console: N fixtures, first address A, step P. If the gap is constant, the entry fits on one line. If not, you have to address fixture by fixture — and it is better to know before you are up the ladder.'
+  },
+  'dmx.pasConstant': {
+    fr: '{nombre} appareils, première adresse {debut}, pas de {pas}',
+    en: '{nombre} fixtures, first address {debut}, step {pas}'
+  },
+  'dmx.pasUnique': {
+    fr: 'un seul appareil, adresse {debut}',
+    en: 'a single fixture, address {debut}'
+  },
+  'dmx.pasRompu': {
+    fr: 'écart irrégulier — adressage appareil par appareil',
+    en: 'irregular gap — address fixture by fixture'
+  },
   'dmx.resteLibre': { fr: "Ce qu'il reste de libre", en: 'What is still free' },
   'dmx.complet': { fr: 'complet', en: 'full' },
   'dmx.patchCoherent': {

@@ -11,6 +11,7 @@ import {
   occupationUnivers,
   plageOccupee,
   plagesLibres,
+  ecartsAdresses,
   proposerPatch,
   verifierPatch
 } from '../commun/dmx.js'
@@ -300,6 +301,114 @@ verifier(
   'la carte et plagesLibres comptent le meme nombre de canaux libres',
   carte.filter((c) => c.etat === 'libre').length === libresSelonPlages,
   `${carte.filter((c) => c.etat === 'libre').length} contre ${libresSelonPlages}`
+)
+
+
+// ── L'adresse de depart, l'univers impose, et les ecarts ────────────────────
+
+// L'adresse de depart : le cas courant ou les premiers canaux sont deja pris
+// par un bloc de gradateurs absent de la liste.
+const depart = proposerPatch([{ nom: 'A', canaux: 16 }, { nom: 'B', canaux: 16 }], 1, 25)
+verifier(
+  'l adresse de depart decale tout le patch',
+  depart[0].adresse === 25 && depart[1].adresse === 41,
+  `${depart[0].adresse} puis ${depart[1].adresse}`
+)
+
+// **Ce cas discrimine** : avec une adresse de depart de 1, les deux tiendraient
+// dans l univers 1. Sans le decalage, le test passerait sans rien prouver.
+const departDeborde = proposerPatch([{ nom: 'A', canaux: 400 }, { nom: 'B', canaux: 200 }], 1, 100)
+verifier(
+  'une adresse de depart qui fait deborder passe a l univers suivant',
+  departDeborde[0].univers === 1 &&
+    departDeborde[0].adresse === 100 &&
+    departDeborde[1].univers === 2 &&
+    departDeborde[1].adresse === 1,
+  JSON.stringify(departDeborde)
+)
+
+verifier('une adresse de depart hors univers est refusee et nommee', (() => {
+  try {
+    proposerPatch([{ nom: 'A', canaux: 4 }], 1, 513)
+    return false
+  } catch (erreur) {
+    return erreur.message.includes('512')
+  }
+})())
+
+// L'univers impose : l'appareil y va, et il ne bouge pas.
+const impose = proposerPatch([
+  { nom: 'Lyre', canaux: 20, univers: 2 },
+  { nom: 'Par', canaux: 8 }
+])
+verifier(
+  'un univers impose est respecte, et le reste suit son cours',
+  impose[0].univers === 2 && impose[0].adresse === 1 &&
+    impose[1].univers === 1 && impose[1].adresse === 1,
+  JSON.stringify(impose)
+)
+
+// Le curseur est propre a chaque univers. Sans cela, revenir sur l univers 1
+// apres avoir epingle sur le 2 reecrirait par-dessus ce qu on vient d y poser.
+const allerRetour = proposerPatch([
+  { nom: 'A', canaux: 10, univers: 1 },
+  { nom: 'B', canaux: 10, univers: 2 },
+  { nom: 'C', canaux: 10, univers: 1 }
+])
+verifier(
+  'chaque univers garde son propre curseur',
+  allerRetour[2].univers === 1 && allerRetour[2].adresse === 11,
+  `C en univers ${allerRetour[2].univers} adresse ${allerRetour[2].adresse}`
+)
+verifier('et le patch qui en resulte ne chevauche pas', verifierPatch(allerRetour).length === 0)
+
+verifier('un univers impose et plein est refuse, pas deplace en silence', (() => {
+  try {
+    proposerPatch([
+      { nom: 'Gros', canaux: 500, univers: 3 },
+      { nom: 'Trop', canaux: 100, univers: 3 }
+    ])
+    return false
+  } catch (erreur) {
+    return erreur.message.includes('univers 3') && erreur.message.includes('Trop')
+  }
+})())
+
+// Les ecarts : ce qu on tape dans une console.
+const serie = proposerPatch([
+  { nom: 'L1', canaux: 16 },
+  { nom: 'L2', canaux: 16 },
+  { nom: 'L3', canaux: 16 }
+])
+const ecartsSerie = ecartsAdresses(serie)
+verifier(
+  'des appareils identiques donnent un pas constant',
+  ecartsSerie.length === 1 && ecartsSerie[0].pas === 16,
+  JSON.stringify(ecartsSerie)
+)
+
+// **Ce cas-la discrimine vraiment** : des modes differents rompent le pas, et
+// c est exactement l information qu on ne devine pas en lisant la liste.
+const melange = proposerPatch([
+  { nom: 'A', canaux: 16 },
+  { nom: 'B', canaux: 8 },
+  { nom: 'C', canaux: 16 }
+])
+const ecartsMelange = ecartsAdresses(melange)
+verifier(
+  'des modes differents rompent le pas, et le pas devient nul',
+  ecartsMelange[0].pas === null && ecartsMelange[0].ecarts.join(',') === '16,8',
+  JSON.stringify(ecartsMelange[0])
+)
+
+verifier(
+  'un seul appareil n annonce aucun pas plutot qu un pas invente',
+  ecartsAdresses(proposerPatch([{ nom: 'Seul', canaux: 16 }]))[0].pas === null
+)
+
+verifier(
+  'les ecarts sont rendus univers par univers, dans l ordre',
+  ecartsAdresses(allerRetour).map((e) => e.univers).join(',') === '1,2'
 )
 
 console.log(echecs === 0 ? '\nCALCUL DMX : TOUS LES TESTS PASSENT' : `\n${echecs} TEST(S) EN ECHEC`)

@@ -41,10 +41,23 @@ export interface Probleme {
 export function plageOccupee(appareil: Appareil): Plage
 export function verifierPatch(appareils: Appareil[]): Probleme[]
 export function proposerPatch(
-  appareils: { nom: string; canaux: number }[],
-  premierUnivers?: number
+  appareils: { nom: string; canaux: number; univers?: number }[],
+  premierUnivers?: number,
+  premiereAdresse?: number
 ): Appareil[]
 export function plagesLibres(appareils: Appareil[], univers: number): Plage[]
+
+export interface EcartUnivers {
+  univers: number
+  /** Les adresses, dans l'ordre croissant. */
+  adresses: number[]
+  /** Les écarts successifs ; il y en a un de moins que d'adresses. */
+  ecarts: number[]
+  /** L'écart s'il est constant, sinon `null` — c'est le « pas » d'une console. */
+  pas: number | null
+}
+
+export function ecartsAdresses(appareils: Appareil[]): EcartUnivers[]
 
 /** `chevauchement` est le seul des trois qui soit une faute. */
 export type EtatCanal = 'libre' | 'occupe' | 'chevauchement'

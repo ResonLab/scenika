@@ -105,6 +105,112 @@ if (!existsSync(cheminEn)) {
   }
 }
 
+/* ── 1 bis. Le calculateur aussi a deux langues ──────────────────────────── */
+
+/**
+ * **La comparaison des deux langues ne regardait que la page d'accueil.**
+ *
+ * Trou trouvé le 13 août 2026 en ajoutant la carte des 512 canaux : rien
+ * n'obligeait la page anglaise du calculateur à suivre. Une section entière
+ * pouvait exister d'un seul côté, et cette suite affichait « deux langues
+ * alignées » — elle disait vrai, mais d'une seule page sur quatre.
+ *
+ * C'est la même famille que les badges d'état : *une vérification dont on a
+ * étendu la confiance au-delà de ce qu'elle regarde*. Le symptôme est
+ * identique — on ne cherche plus à la main ce qu'on croit couvert.
+ *
+ * Le calculateur est comparé plus sévèrement que l'accueil, et c'est
+ * justifié : il porte du **code**. Une page traduite dont le script diverge
+ * n'est pas une page mal traduite, c'est un calculateur qui donne un autre
+ * résultat selon la langue du lecteur.
+ */
+const cheminDmxFr = join(DOCS, 'calculateur-dmx.html')
+const cheminDmxEn = join(DOCS, 'en/calculateur-dmx.html')
+
+/**
+ * **Chaque identifiant visé par le script doit exister comme balise.**
+ *
+ * Dans les deux langues, et d'abord dans la française — c'est elle qu'on
+ * modifie. Une coquille dans un `$('premiereAdrese')` rend `null`, la page se
+ * charge, s'affiche parfaitement, et le champ ne pilote plus rien. Rien dans le
+ * typecheck ni dans les suites du calcul ne peut le voir : le calcul est juste,
+ * c'est le fil entre l'écran et lui qui est coupé.
+ *
+ * C'est la même leçon que Scenika bloquée par un CSS manquant : **un mécanisme
+ * peut exister dans le code et rester inatteignable à l'écran.**
+ */
+for (const [nom, chemin] of [
+  ['calculateur-dmx.html', cheminDmxFr],
+  ['en/calculateur-dmx.html', cheminDmxEn]
+]) {
+  if (!existsSync(chemin)) continue
+  const html = readFileSync(chemin, 'utf-8')
+  for (const id of new Set([...html.matchAll(/\$\('([\w-]+)'\)/g)].map((m) => m[1]))) {
+    if (!html.includes(`id="${id}"`)) {
+      echec(`${nom} : le script vise « ${id} », qui n'existe dans aucune balise`)
+    }
+  }
+}
+
+if (!existsSync(cheminDmxEn)) {
+  echec('docs/en/calculateur-dmx.html est absent')
+} else {
+  const dmxFr = readFileSync(cheminDmxFr, 'utf-8').replaceAll('\r\n', '\n')
+  const dmxEn = readFileSync(cheminDmxEn, 'utf-8').replaceAll('\r\n', '\n')
+
+  const compter = (html, motif) => (html.match(motif) ?? []).length
+  for (const [nom, motif] of [
+    ['sections', /<section\b/g],
+    ['titres de section', /<h2>/g],
+    ['champs de saisie', /<input\b/g],
+    ['boutons', /<button\b/g],
+    ['pastilles de légende', /class="pastille"/g]
+  ]) {
+    const a = compter(dmxFr, motif)
+    const b = compter(dmxEn, motif)
+    if (a !== b) echec(`calculateur, ${nom} : ${a} en français, ${b} en anglais`)
+  }
+
+  // Le CSS est identique par construction : seule la palette de la maison le
+  // décide, et une page traduite n'a aucune raison d'avoir sa mise en forme.
+  const style = (html) => html.slice(html.indexOf('<style>'), html.indexOf('</style>'))
+  if (style(dmxFr) !== style(dmxEn)) {
+    echec('le CSS des deux calculateurs diffère — la page anglaise a été éditée à la main')
+  }
+
+  /**
+   * **Les identifiants pilotés par le script doivent exister des deux côtés.**
+   *
+   * Comparer le script entier serait un faux échec permanent : il contient des
+   * chaînes visibles, et elles sont traduites — c'est le but. On compare donc
+   * ce qui doit être identique par nécessité : les `id` que le script cherche.
+   * Un `id` présent d'un seul côté, et la moitié des lecteurs a une page qui
+   * s'affiche et ne calcule rien.
+   */
+  const identifiants = (html) =>
+    [...html.matchAll(/\$\('([\w-]+)'\)/g)].map((m) => m[1])
+  const manquants = [...new Set(identifiants(dmxFr))].filter(
+    (id) => !dmxEn.includes(`id="${id}"`)
+  )
+  for (const id of manquants) {
+    echec(`calculateur anglais : le script vise « ${id} », qui n'existe dans aucune balise`)
+  }
+
+  // Les fonctions du module partagé doivent être importées des deux côtés :
+  // c'est ce qui garantit que les deux pages font vraiment le même calcul.
+  const importees = (html) =>
+    (html.match(/import \{([\s\S]*?)\} from/)?.[1] ?? '')
+      .split(',')
+      .map((n) => n.trim())
+      .filter(Boolean)
+      .sort()
+  const a = importees(dmxFr).join(', ')
+  const b = importees(dmxEn).join(', ')
+  if (a !== b) {
+    echec(`calculateur : imports différents — français « ${a} », anglais « ${b} »`)
+  }
+}
+
 /* ── 2. Le calculateur trouve sa formule une fois le site préparé ────────── */
 
 // GitHub Pages ne sert que `docs/`. Le calcul DMX, lui, vit dans `commun/`,

@@ -98,27 +98,87 @@
         outline-offset: 1px;
       }
 
+      /* ── Les boutons ─────────────────────────────────────────────────────
+         Le dégradé est réservé au bouton qui fait l'action principale de la
+         page. Quand tous les boutons crient, plus aucun ne guide : « Ajouter »
+         et « Tout effacer » avaient la même voix, et « Retirer » aussi, une
+         fois par ligne du tableau. */
       button {
-        background: linear-gradient(90deg, var(--ambre), var(--orange));
-        border: 0;
-        border-radius: 6px;
+        background: linear-gradient(135deg, var(--ambre), var(--orange));
+        border: 1px solid transparent;
+        border-radius: 8px;
         color: #201703;
         font: inherit;
         font-weight: 600;
-        padding: 0.55rem 1rem;
+        letter-spacing: 0.01em;
+        padding: 0.58rem 1.15rem;
         cursor: pointer;
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.22) inset;
+        transition:
+          transform 0.12s ease,
+          box-shadow 0.18s ease,
+          filter 0.18s ease;
+      }
+
+      button:hover {
+        filter: brightness(1.07);
+        box-shadow:
+          0 1px 0 rgba(255, 255, 255, 0.22) inset,
+          0 4px 14px rgba(242, 117, 26, 0.28);
+      }
+
+      /* Le bouton s'enfonce au clic. Un mouvement d'un pixel suffit à dire que
+         le clic a été pris — sur un formulaire qu'on remplit vingt fois de
+         suite, c'est ce qui évite le double envoi. */
+      button:active {
+        transform: translateY(1px);
+        box-shadow: none;
+      }
+
+      /* Le clavier doit voir ce que la souris voit. Sans anneau visible, la
+         page est inutilisable sans souris, et personne ne s'en aperçoit. */
+      button:focus-visible {
+        outline: 2px solid var(--ambre);
+        outline-offset: 2px;
       }
 
       button.discret {
         background: transparent;
         border: 1px solid var(--trait);
+        color: var(--discret);
+        font-weight: 500;
+        box-shadow: none;
+      }
+
+      button.discret:hover {
+        filter: none;
+        border-color: var(--ambre);
         color: var(--texte);
-        font-weight: 400;
+        background: rgba(255, 201, 97, 0.07);
+        box-shadow: none;
       }
 
       button:disabled {
         opacity: 0.5;
         cursor: not-allowed;
+      }
+
+      /* Un bouton désactivé ne réagit ni au survol ni au clic : le faire
+         bouger promet une action qui n'arrivera pas. */
+      button:disabled:hover,
+      button:disabled:active {
+        filter: none;
+        transform: none;
+        box-shadow: none;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        button {
+          transition: none;
+        }
+        button:active {
+          transform: none;
+        }
       }
 
       table {
@@ -169,6 +229,140 @@
         color: var(--discret);
       }
 
+      /* ── La carte des 512 canaux ─────────────────────────────────────────
+         Trente-deux colonnes, seize rangées : c'est le découpage dans lequel
+         un technicien lit une adresse. En rangées de 10 ou de 20, retrouver
+         le canal 137 demande un calcul ; en rangées de 32, il est au bout du
+         cinquième bloc, et l'œil y va seul. */
+      .univers-titre {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 1rem;
+        margin: 1.2rem 0 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .univers-titre h3 {
+        margin: 0;
+        font-size: 1rem;
+      }
+
+      .univers-compte {
+        color: var(--discret);
+        font-size: 0.85rem;
+      }
+
+      .carte-canaux {
+        display: grid;
+        grid-template-columns: repeat(32, 1fr);
+        gap: 2px;
+        /* Les 512 carrés forment un bloc : il ne doit jamais déborder la page
+           sur un petit écran, sinon la moitié de l'univers est invisible. */
+        min-width: 480px;
+      }
+
+      .canal {
+        aspect-ratio: 1;
+        border-radius: 2px;
+        background: var(--trait);
+        /* Une seule transition, sur la couleur. Cinq cent douze carrés qui
+           glissent ou grandissent chacun de leur côté donnent un scintillement
+           illisible — et c'est un outil de lecture, pas une démonstration. */
+        transition: background-color 0.18s ease;
+      }
+
+      .canal.occupe {
+        background: var(--ambre);
+      }
+
+      .canal.chevauchement {
+        background: var(--rouge);
+        /* Le seul carré qui bouge, parce que c'est le seul qui doit arrêter
+           l'œil : un chevauchement se découvre autrement une fois tout
+           accroché. */
+        animation: bat 1.4s ease-in-out infinite;
+      }
+
+      @keyframes bat {
+        50% {
+          opacity: 0.45;
+        }
+      }
+
+      /* Une animation qui clignote est un piège d'accessibilité. Le réglage du
+         système fait autorité : la couleur suffit à distinguer les trois
+         états. */
+      @media (prefers-reduced-motion: reduce) {
+        .canal {
+          transition: none;
+        }
+        .canal.chevauchement {
+          animation: none;
+        }
+      }
+
+      .legende {
+        display: flex;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+        margin-top: 0.9rem;
+        font-size: 0.85rem;
+        color: var(--discret);
+      }
+
+      .legende span {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+
+      .pastille {
+        width: 11px;
+        height: 11px;
+        border-radius: 2px;
+        display: inline-block;
+        flex: none;
+      }
+
+      /* ── Les écarts, tels qu'on les tape dans une console ────────────────── */
+      .pas-console {
+        font-variant-numeric: tabular-nums;
+        margin: 0 0 0.6rem;
+      }
+
+      .pas-console strong {
+        color: var(--ambre);
+      }
+
+      .pas-rompu {
+        color: var(--texte);
+      }
+
+      .suite-ecarts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.3rem;
+        margin: 0.35rem 0 1rem;
+        font-variant-numeric: tabular-nums;
+        font-size: 0.85rem;
+      }
+
+      .suite-ecarts i {
+        font-style: normal;
+        border: 1px solid var(--trait);
+        border-radius: 4px;
+        padding: 0.1rem 0.4rem;
+        color: var(--discret);
+      }
+
+      /* L'écart qui sort du rang est le seul qu'on cherche : c'est lui qui
+         oblige à adresser à la main au lieu d'une saisie en série. */
+      .suite-ecarts i.rompu {
+        border-color: var(--rouge);
+        color: var(--texte);
+      }
+
       footer {
         color: var(--discret);
         font-size: 0.85rem;
@@ -212,9 +406,35 @@
             Quantité
             <input id="quantite" type="number" min="1" max="200" value="4" required />
           </label>
+          <label>
+            Univers
+            <select id="universChoisi">
+              <option value="">Automatique</option>
+            </select>
+          </label>
           <button type="submit">Ajouter</button>
           <button type="button" class="discret" id="vider">Tout effacer</button>
         </form>
+
+        <div class="ligne-saisie">
+          <label>
+            Premier univers
+            <input id="premierUnivers" type="number" min="1" max="64" value="1" />
+          </label>
+          <label>
+            Adresse de départ
+            <input id="premiereAdresse" type="number" min="1" max="512" value="1" />
+          </label>
+          <label>
+            Nombre d'univers
+            <input id="nombreUnivers" type="number" min="1" max="64" value="1" />
+          </label>
+        </div>
+        <p class="sous-titre">
+          L'adresse de départ sert quand les premiers canaux sont déjà pris par du matériel absent
+          de cette liste — un bloc de gradateurs, une machine câblée en dur. Un appareil dont
+          l'univers est <strong>choisi</strong> y reste, quoi qu'il arrive.
+        </p>
       </section>
 
       <section class="carte">
@@ -236,6 +456,30 @@
           </table>
         </div>
         <p id="rien" class="vide">Ajoutez un appareil pour voir le patch.</p>
+      </section>
+
+      <section class="carte">
+        <h2>Les écarts entre adresses</h2>
+        <p class="sous-titre">
+          Ce qu'on tape dans une console&nbsp;: <em>N appareils, première adresse A, pas P</em>.
+          Si l'écart est constant, la saisie tient en une ligne. S'il ne l'est pas, il faut
+          adresser appareil par appareil — et mieux vaut le savoir avant d'être en haut de l'échelle.
+        </p>
+        <div id="ecarts" class="vide">—</div>
+      </section>
+
+      <section class="carte">
+        <h2>La carte des 512 canaux</h2>
+        <p class="sous-titre">
+          Un carré par canal, trente-deux par rangée. Un univers entier se lit d'un coup d'œil&nbsp;:
+          les blocs occupés, les trous entre eux, et <strong>les chevauchements</strong>.
+        </p>
+        <div id="cartes" class="vide">—</div>
+        <div class="legende">
+          <span><i class="pastille" style="background: var(--trait)"></i> Libre</span>
+          <span><i class="pastille" style="background: var(--ambre)"></i> Occupé</span>
+          <span><i class="pastille" style="background: var(--rouge)"></i> Chevauchement</span>
+        </div>
       </section>
 
       <section class="carte">
@@ -264,7 +508,15 @@
       // recalcule rien elle-même. C'est la règle numéro un — une formule à un
       // seul endroit — et c'est exactement le genre de code qui diverge si on
       // le duplique « juste pour la page web ».
-      import { plageOccupee, plagesLibres, proposerPatch, verifierPatch } from './commun/dmx.js'
+      import {
+        CANAUX_PAR_UNIVERS,
+        ecartsAdresses,
+        occupationUnivers,
+        plageOccupee,
+        plagesLibres,
+        proposerPatch,
+        verifierPatch
+      } from './commun/dmx.js'
 
       /** @type {{ nom: string, canaux: number }[]} */
       let appareils = []
@@ -278,13 +530,54 @@
         const quantite = Number($('quantite').value)
         if (!nom || canaux < 1 || quantite < 1) return
 
+        // L'univers est retenu **au moment de l'ajout**, pas relu ensuite : un
+        // appareil épinglé sur l'univers 2 doit y rester même si le sélecteur
+        // change pour le groupe suivant.
+        const choisi = $('universChoisi').value
         for (let i = 1; i <= quantite; i += 1) {
-          appareils.push({ nom: quantite > 1 ? `${nom} ${i}` : nom, canaux })
+          const appareil = { nom: quantite > 1 ? `${nom} ${i}` : nom, canaux }
+          if (choisi !== '') appareil.univers = Number(choisi)
+          appareils.push(appareil)
         }
         $('nom').value = ''
         $('nom').focus()
         afficher()
       })
+
+      for (const id of ['premierUnivers', 'premiereAdresse', 'nombreUnivers']) {
+        $(id).addEventListener('input', () => {
+          if (id === 'nombreUnivers') remplirChoixUnivers()
+          afficher()
+        })
+      }
+
+      /**
+       * Le sélecteur d'univers suit le nombre d'univers déclaré.
+       *
+       * La liste se reconstruit, mais **le choix en cours est préservé** : la
+       * refaire à zéro ramènerait le sélecteur sur « Automatique » à chaque
+       * frappe dans le champ voisin, et on épinglerait sans le vouloir.
+       */
+      function remplirChoixUnivers() {
+        const selecteur = $('universChoisi')
+        const avant = selecteur.value
+        const premier = Math.max(1, Number($('premierUnivers').value) || 1)
+        const combien = Math.max(1, Number($('nombreUnivers').value) || 1)
+
+        selecteur.textContent = ''
+        const auto = document.createElement('option')
+        auto.value = ''
+        auto.textContent = 'Automatique'
+        selecteur.append(auto)
+
+        for (let n = premier; n < premier + combien; n += 1) {
+          const option = document.createElement('option')
+          option.value = String(n)
+          option.textContent = `Univers ${n}`
+          selecteur.append(option)
+        }
+        selecteur.value = [...selecteur.options].some((o) => o.value === avant) ? avant : ''
+      }
 
       $('vider').addEventListener('click', () => {
         appareils = []
@@ -299,17 +592,29 @@
 
         if (appareils.length === 0) {
           $('libres').textContent = '—'
+          $('cartes').textContent = '—'
+          $('cartes').className = 'vide'
+          $('ecarts').textContent = '—'
+          $('ecarts').className = 'vide'
           return
         }
 
         let patch
         try {
-          patch = proposerPatch(appareils)
+          patch = proposerPatch(
+            appareils,
+            Math.max(1, Number($('premierUnivers').value) || 1),
+            Math.max(1, Number($('premiereAdresse').value) || 1)
+          )
         } catch (erreur) {
           // Un appareil plus grand qu'un univers, par exemple : le message du
           // module est déjà écrit pour un technicien, on le montre tel quel.
           $('messages').append(bloc('probleme', erreur.message))
           $('libres').textContent = '—'
+          $('cartes').textContent = '—'
+          $('cartes').className = 'vide'
+          $('ecarts').textContent = '—'
+          $('ecarts').className = 'vide'
           return
         }
 
@@ -356,7 +661,11 @@
           lignes.append(ligne)
         }
 
-        const universUtilises = [...new Set(patch.map((a) => a.univers))]
+        const universUtilises = [...new Set(patch.map((a) => a.univers))].sort((a, b) => a - b)
+
+        dessinerEcarts(patch)
+        dessinerCartes(patch, universUtilises)
+
         $('libres').textContent = universUtilises
           .map((univers) => {
             const plages = plagesLibres(patch, univers)
@@ -367,6 +676,132 @@
           .join(' · ')
       }
 
+      /**
+       * La carte des 512 canaux, un univers après l'autre.
+       *
+       * **L'état de chaque canal vient de `occupationUnivers`**, dans le
+       * module partagé, et n'est pas recompté ici. Le recompter donnerait une
+       * carte qui pourrait contredire la liste des problèmes affichée juste
+       * au-dessus — et on ne saurait plus laquelle croire. C'est la règle
+       * numéro un de la maison, et c'est exactement le genre de code qu'on
+       * duplique « juste pour la page web ».
+       */
+      function dessinerCartes(patch, universUtilises) {
+        const conteneur = $('cartes')
+        conteneur.textContent = ''
+        conteneur.className = ''
+
+        for (const univers of universUtilises) {
+          const canaux = occupationUnivers(patch, univers)
+          const occupes = canaux.filter((c) => c.etat === 'occupe').length
+          const encombres = canaux.filter((c) => c.etat === 'chevauchement').length
+
+          const titre = document.createElement('div')
+          titre.className = 'univers-titre'
+
+          const nom = document.createElement('h3')
+          nom.textContent = `Univers ${univers}`
+          titre.append(nom)
+
+          const compte = document.createElement('span')
+          compte.className = 'univers-compte'
+          // Le libre se déduit, il ne se compte pas une seconde fois : deux
+          // façons d'obtenir le même nombre finissent par en donner deux.
+          const libres = CANAUX_PAR_UNIVERS - occupes - encombres
+          compte.textContent =
+            `${occupes + encombres} canaux occupés · ${libres} libres` +
+            (encombres > 0 ? ` · ${encombres} en chevauchement` : '')
+          titre.append(compte)
+
+          conteneur.append(titre)
+
+          const defilable = document.createElement('div')
+          defilable.className = 'defilable'
+
+          const grille = document.createElement('div')
+          grille.className = 'carte-canaux'
+
+          for (const canal of canaux) {
+            const carre = document.createElement('i')
+            carre.className = `canal ${canal.etat === 'libre' ? '' : canal.etat}`.trim()
+            // Le survol dit quel canal et quel appareil. Sans cela, la carte
+            // montre qu'il y a un problème sans dire lequel — et il faut
+            // recompter à la main, ce qui est précisément ce qu'on évite.
+            const numero = String(canal.canal).padStart(3, '0')
+            carre.title =
+              canal.appareils.length === 0
+                ? `Canal ${numero} — libre`
+                : `Canal ${numero} — ${canal.appareils.join(' + ')}`
+            grille.append(carre)
+          }
+
+          defilable.append(grille)
+          conteneur.append(defilable)
+        }
+      }
+
+      /**
+       * Les écarts entre adresses, univers par univers.
+       *
+       * **Le calcul vient de `ecartsAdresses`**, dans le module partagé. Le
+       * refaire ici donnerait un pas qui pourrait contredire la carte affichée
+       * juste en dessous — et on ne saurait plus laquelle croire.
+       */
+      function dessinerEcarts(patch) {
+        const conteneur = $('ecarts')
+        conteneur.textContent = ''
+        conteneur.className = ''
+
+        for (const groupe of ecartsAdresses(patch)) {
+          const ligne = document.createElement('p')
+          ligne.className = 'pas-console'
+
+          if (groupe.pas !== null) {
+            ligne.append(
+              `Univers ${groupe.univers} · ${groupe.adresses.length} appareils, première adresse `
+            )
+            const debut = document.createElement('strong')
+            debut.textContent = String(groupe.adresses[0]).padStart(3, '0')
+            ligne.append(debut, ', pas de ')
+            const pas = document.createElement('strong')
+            pas.textContent = String(groupe.pas)
+            ligne.append(pas)
+          } else if (groupe.adresses.length < 2) {
+            ligne.append(
+              `Univers ${groupe.univers} · un seul appareil, adresse ` +
+                String(groupe.adresses[0]).padStart(3, '0')
+            )
+          } else {
+            // On ne cache pas l'irrégularité derrière une moyenne : un pas
+            // inventé serait recopié dans une console, et ce sont les canaux
+            // qui trancheraient sur le plateau.
+            ligne.append(`Univers ${groupe.univers} · `)
+            const alerte = document.createElement('span')
+            alerte.className = 'pas-rompu'
+            alerte.textContent = 'écart irrégulier — adressage appareil par appareil'
+            ligne.append(alerte)
+          }
+          conteneur.append(ligne)
+
+          if (groupe.ecarts.length > 0) {
+            const suite = document.createElement('div')
+            suite.className = 'suite-ecarts'
+            for (const [index, ecart] of groupe.ecarts.entries()) {
+              const case_ = document.createElement('i')
+              // Le premier écart sert de référence : c'est par rapport à lui
+              // qu'un écart « sort du rang ».
+              if (ecart !== groupe.ecarts[0]) case_.className = 'rompu'
+              const de = String(groupe.adresses[index]).padStart(3, '0')
+              const a = String(groupe.adresses[index + 1]).padStart(3, '0')
+              case_.textContent = `+${ecart}`
+              case_.title = `${de} → ${a}`
+              suite.append(case_)
+            }
+            conteneur.append(suite)
+          }
+        }
+      }
+
       function bloc(classe, texte) {
         const element = document.createElement('p')
         element.className = classe
@@ -374,6 +809,7 @@
         return element
       }
 
+      remplirChoixUnivers()
       afficher()
     </script>
   </body>
