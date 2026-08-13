@@ -15,12 +15,15 @@
 | **Puissance** | écrit — répartition sur les circuits, à partir des watts du parc |
 | **Calculateur DMX** | écrit, relié au parc ; carte des 512 canaux ; page publique gratuite bilingue |
 
-**Français et anglais** dans toute l'application (115 clés). **Multi-postes** par
+**Français et anglais** dans toute l'application (188 clés). **Multi-postes** par
 Nexika, éprouvé par le réseau. **Conditions d'utilisation** avec écran
-d'acceptation. Publiée en 0.1.0 pour Windows et Linux — mais **cette release est
-antérieure à tout ce qui précède** : il faut une 0.2.0.
+d'acceptation, et **guide de prise en main** en page et en PDF.
 
-`npm run verifier` : typecheck + 9 suites.
+**La 0.2.0 est publiée** pour Windows et Linux — `.exe`, AppImage et `.deb` — et
+c'est elle que téléchargent les visiteurs. Elle apporte tout ce qui précède : la
+0.1.0 n'avait ni Location, ni Puissance, ni multi-postes.
+
+`npm run verifier` : typecheck + 10 suites.
 
 **Un bug à ne jamais réintroduire, trouvé en lançant l'application et pas en la
 relisant :** `.conditions-texte` n'avait aucune règle CSS. La zone n'était donc
@@ -303,6 +306,55 @@ affichages du même patch qui se contredisent, c'est pire qu'un seul.
 **À faire : la page web de consultation mobile**, servie par Nexika sur le
 réseau local. Elle était « décidée, reportée » faute de serveur ; **le serveur
 tourne maintenant**, donc c'est du travail réel.
+
+---
+
+
+## Le guide de prise en main
+
+**Le site disait ce que fait l'application et ce qu'elle ne fait pas. Il ne
+disait nulle part par où commencer.** Quelqu'un qui télécharge se retrouve
+devant une application vide sans savoir quoi cliquer, et c'est là qu'on perd
+les gens — pas à la page d'accueil.
+
+`src/partage/guide.ts` porte le texte dans les deux langues et **nulle part ailleurs** :
+`scripts/publier-guide.mjs` en déduit `docs/guide.html` et `docs/en/guide.html`,
+`scripts/guide-pdf.mjs` en tire les deux PDF joints aux releases. Un guide
+recopié à la main divergerait au premier correctif — et c'est le document qu'on
+emporte, donc celui qu'on croit.
+
+**L'ordre des étapes n'est pas décoratif** : c'est celui dans lequel
+l'application ne refuse rien. `tests/coherence-guide.mjs` le vérifie, en plus de
+refuser qu'une page diverge de la source, qu'une traduction soit vide, ou qu'une
+étape perde son **piège**. Les pièges sont la moitié de la valeur : ce sont les
+choses qu'on ne devine pas et qui coûtent une soirée.
+
+```bash
+npm run guide:publier   # les deux pages
+npm run guide:pdf       # les deux PDF, dans release/
+```
+
+**Trois défauts de ce mécanisme, trouvés en le portant d'une application à
+l'autre**, et corrigés dans les quatre dépôts :
+
+· un seuil de longueur prenait « Receipts » et « Backups » — des titres anglais
+  parfaitement traduits — pour des traductions vides. On teste désormais le
+  vide, pas la longueur. **Un faux échec use un contrôle aussi sûrement qu'un
+  faux succès** ;
+· le caractère `&` s'écrit `&amp;` en HTML : le contrôle annonçait un texte
+  disparu alors que la page était juste ;
+· une liste figée d'ancres à réécrire laissait des ancres mortes sur le guide,
+  les sections d'une page d'accueil ne portant pas les mêmes noms d'une
+  application à l'autre. Toutes les ancres renvoient maintenant à l'accueil.
+
+**Le PDF a révélé un bug qui traînait dans la maison depuis des semaines** :
+« `fabriquer-icones.mjs` échoue au-delà de la première image ». Ce n'est ni le
+chemin ni le fichier temporaire — **créer une seconde `BrowserWindow` après
+avoir travaillé dans la première fait échouer son chargement** sur `ERR_FAILED`.
+Une seule fenêtre réutilisée, et les deux PDF sortent. *Une hypothèse a été
+suivie puis abandonnée, et elle est notée dans le code : `loadFile` produit bien
+sous Windows une adresse mêlant `file:///` et des antislashs. C'est vrai, c'est
+corrigé, et ça n'a rien changé.*
 
 ---
 
