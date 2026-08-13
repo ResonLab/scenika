@@ -33,6 +33,24 @@ export default function Scene(): React.JSX.Element {
   // cadence rendrait le glissement saccadé.
   const glisse = useRef<number | null>(null)
 
+  /**
+   * Un glissement vient-il de se terminer ?
+   *
+   * **Le défaut que ceci corrige, signalé par l'utilisateur : « dès que
+   * j'appuie sur un projo, il se duplique ».**
+   *
+   * Le navigateur émet `click` sur l'**ancêtre commun** du `mousedown` et du
+   * `mouseup`. Presser sur un appareil puis relâcher ailleurs sur le plan fait
+   * donc remonter le clic jusqu'au plan — dont le `onClick` pose un nouvel
+   * appareil si une référence est encore sélectionnée dans le parc.
+   * `stopPropagation` sur l'appareil n'y peut rien : le clic ne le traverse
+   * même pas.
+   *
+   * Une référence et non un état : elle est lue dans le `click` qui suit
+   * immédiatement le `mouseup`, avant tout nouveau rendu.
+   */
+  const glissementTermine = useRef(false)
+
   const recharger = useCallback(async () => {
     setPoses(await window.api.scene.lister())
   }, [])
@@ -87,6 +105,11 @@ export default function Scene(): React.JSX.Element {
   }
 
   function poserSurLePlan(evenement: React.MouseEvent): void {
+    // Un clic qui n'est que la fin d'un glissement ne pose rien.
+    if (glissementTermine.current) {
+      glissementTermine.current = false
+      return
+    }
     if (aPoser === null) return
     const materiel = parc.find((m) => m.id === aPoser)
     if (!materiel) return
@@ -111,6 +134,9 @@ export default function Scene(): React.JSX.Element {
     const id = glisse.current
     glisse.current = null
     if (id === null) return
+
+    // Le `click` qui suit doit être ignoré : voir `glissementTermine`.
+    glissementTermine.current = true
     const appareil = poses.find((a) => a.id === id)
     if (!appareil) return
     const { x, y } = fractionDuPlan(evenement)
