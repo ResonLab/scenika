@@ -1,18 +1,19 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Scenika — le parc son et lumière, et son adressage DMX</title>
-<meta name="description" content="Scenika gère le parc matériel son et lumière d'une société de location ou d'un technicien indépendant : ce qu'on possède, ce qui est parti, ce que ça consomme, et le patch DMX. Vos données restent sur votre ordinateur." />
-<link rel="icon" href="scenika.svg" type="image/svg+xml" />
+<title>Scenika — where to start</title>
+<meta name="description" content="Getting started with Scenika: inventory, rentals, power, DMX, invoicing. In that order, and why." />
+<link rel="icon" href="../scenika.svg" type="image/svg+xml" />
 <meta property="og:title" content="Scenika" />
-<meta property="og:description" content="Le parc son et lumière, les locations, la puissance et l'adressage DMX. Vos données restent chez vous." />
+<meta property="og:description" content="Getting started with Scenika: inventory, rentals, power, DMX, invoicing. In that order, and why." />
 <meta property="og:type" content="website" />
 
 <script>
 /* Le thème est appliqué avant le premier rendu : sans cela, une page sombre
-   clignoterait en blanc le temps que le script s'exécute. */
+   clignoterait en blanc le temps que le script s'exécute.
+   Les commentaires restent en français : c'est la langue de travail du projet. */
 (function () {
   try {
     var choix = localStorage.getItem('resonlab-theme')
@@ -261,16 +262,6 @@
     .card:hover, .btn:hover { transform: none; }
     .progres { display: none; }
   }
-
-  /* Le piege d'une etape du guide : ce qu'on ne devine pas, et qui coute une
-     soiree. Il doit se distinguer du texte courant sans crier. */
-  .piege {
-    border-left: 3px solid var(--accent, #F2751A);
-    padding-left: 12px;
-    margin-top: 12px;
-    color: var(--fg-dim);
-    font-size: 14.5px;
-  }
 </style>
 </head>
 
@@ -281,17 +272,16 @@
 <header id="entete">
   <div class="wrap bar">
     <a class="brand" href="./">
-      <img src="scenika.svg" alt="" width="30" height="30" />
+      <img src="../scenika.svg" alt="" width="30" height="30" />
       <span class="nom">Scenika</span>
     </a>
     <nav class="nav">
-      <a href="guide.html">Par où commencer</a>
-      <a href="#modules">Ce qu'elle fait</a>
-      <a href="#dmx" class="hide-sm">Calculateur DMX</a>
-      <a href="#principes" class="hide-sm">Nos principes</a>
+      <a href="index.html#modules">What it does</a>
+      <a href="index.html#dmx" class="hide-sm">DMX calculator</a>
+      <a href="index.html#principes" class="hide-sm">Our principles</a>
       <a href="https://github.com/ResonLab/scenika">GitHub</a>
-      <a href="en/" class="langue" hreflang="en">EN</a>
-      <button class="theme" id="theme" type="button" aria-label="Changer le thème">
+      <a href="../guide.html" class="langue" hreflang="fr">FR</a>
+      <button class="theme" id="theme" type="button" aria-label="Switch theme">
         <svg class="i-sombre" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>
         </svg>
@@ -306,129 +296,73 @@
 
 <main>
   <section class="hero wrap">
-    <p class="etat-ligne">PUBLIÉ — 0.1.0 · WINDOWS ET LINUX</p>
-    <h1>Votre parc, <span class="grad-text">au complet</span>.</h1>
-    <p class="chapo">
-      Ce qu'on possède, ce qui est parti, ce que ça consomme, et à quelle adresse c'est patché.
-      Scenika est faite pour une société de location et pour le technicien qui charge son camion
-      tout seul.
-    </p>
-    <div class="actions">
-      <a class="btn" href="https://github.com/ResonLab/scenika/releases/latest">Télécharger — Windows et Linux</a>
-      <a class="btn btn-ghost" href="calculateur-dmx.html">Calculateur DMX gratuit</a>
-      <a class="btn btn-ghost" href="#modules">Ce qu'elle fait</a>
-    </div>
+    <p class="etat-ligne">GETTING STARTED</p>
+    <h1>Where to <span class="grad-text">start</span>.</h1>
+    <p class="chapo">Inventory, rentals, power, DMX, then invoicing and teamwork. That order and no other: it is the one in which the application refuses nothing.</p>
   </section>
 
-  <section id="modules" class="wrap">
-    <h2 class="titre reveal">Quatre modules, un seul parc</h2>
-    <p class="intro reveal" style="--d:.06s">
-      Tout se rattache au matériel réel. Un projecteur a un nombre de canaux, une puissance et un
-      propriétaire : c'est la même fiche qui sert au patch, au calcul de charge et au bon de sortie.
-    </p>
-
-    <div class="cards deux">
-      <div class="card reveal">
-        <span class="num">ÉCRIT</span>
-        <h3>Parc matériel</h3>
-        <p>Enceintes, projecteurs, câbles, accessoires. États, quantités, emplacements.</p>
-        <p><strong>Le matériel loué et le matériel possédé sont distingués dès la base</strong> :
-        les mélanger fausse l'inventaire le jour où l'on rend le camion.</p>
-      </div>
-      <div class="card reveal" style="--d:.06s">
-        <span class="num">ÉCRIT</span>
-        <h3>Adressage DMX</h3>
-        <p>Le patch relié au parc réel : chevauchements détectés, bascule d'univers automatique,
-        plages restées libres.</p>
-        <p>La version gratuite de ce calculateur est <a href="calculateur-dmx.html">sur cette page</a>,
-        sans inscription.</p>
-      </div>
-      <div class="card reveal" style="--d:.12s">
-        <span class="num">ÉCRIT</span>
-        <h3>Location</h3>
-        <p>Qui a quoi, depuis quand, jusqu'à quand. Départs, retours, et ce qui n'est pas revenu.</p>
-        <p><strong>Le parc ne bouge pas quand du matériel part.</strong> Il dit ce qu'on possède ;
-        ce qui est dehors se calcule. Décrémenter les quantités à la sortie serait plus simple et
-        faux : une location oubliée laisserait un stock que rien ne rattrape.</p>
-        <p>Une location se facture : Scenika exporte des lignes que
-        <a href="https://resonlab.github.io/ohmnia/">Ohmnia</a> importe, plutôt que de refaire un
-        module de facturation ici.</p>
-      </div>
-      <div class="card reveal" style="--d:.18s">
-        <span class="num">ÉCRIT</span>
-        <h3>Puissance</h3>
-        <p>La consommation d'une installation, répartie par circuit et par tableau, à partir des
-        watts déjà saisis dans le parc.</p>
-        <p>Le plus gourmand d'abord, puis dans le premier circuit qui l'accepte. <strong>La règle
-        est simple exprès</strong> : un technicien doit pouvoir la refaire de tête sur le terrain,
-        parce que c'est à la main qu'il branche. Un appareil plus gourmand qu'un circuit entier est
-        refusé et nommé, jamais casé de force.</p>
-        <p><strong>Jamais présentée comme une certitude électrique.</strong> Un circuit 16 A en
-        230 V tient environ 3 600 W en théorie, moins en pratique : la marge est affichée. Une
-        erreur ici fait sauter un spectacle, ou pire.</p>
-      </div>
+  <section class="wrap">
+    <h2 class="titre reveal">1. Fill the inventory</h2>
+    <p class="intro reveal">Always start here. Everything else hangs off it: a rental takes gear out of the inventory, a power calculation adds up its watts, a DMX patch reads its channel counts.</p>
+    <div class="card reveal">
+      <h3>Enter the equipment</h3>
+      <p>Inventory tab. For each item: name, quantity, condition, location. For anything that draws power, its wattage. For a DMX fixture, its channel count and its modes.</p>
+      <p class="piege"><strong>The catch</strong> — Gear hired in from a colleague is not gear you own. An inventory holds both, and mixing them falsifies your stock the day you return the truck. Separate them from the start.</p>
     </div>
-  </section>
-
-  <section id="dmx" class="bande">
-    <div class="wrap">
-      <h2 class="titre reveal">Le calculateur DMX, gratuit et entier</h2>
-      <p class="intro reveal" style="--d:.06s">
-        Il fait un calcul, parfaitement, sans rien retenir et sans rien demander. Ce n'est pas une
-        version de démonstration bridée : <strong>un outil amputé exprès irrite au lieu de
-        convertir.</strong>
-      </p>
-
-      <div class="phare reveal" style="--d:.12s">
-        <div>
-          <h3>Adresso</h3>
-          <p>
-            Un appareil en mode 16 canaux adressé en 001 occupe 001 à 016 : le suivant ne peut pas
-            commencer avant 017. Le chevauchement d'adresses est <em>l'</em>erreur classique, et
-            c'est la première chose que le calculateur détecte.
-          </p>
-          <p>
-            Un univers contient 512 canaux. Au-delà, il faut un second univers — le calculateur le
-            dit et bascule, au lieu de produire un patch impossible.
-          </p>
-          <div class="actions">
-            <a class="btn" href="calculateur-dmx.html">Ouvrir le calculateur</a>
-          </div>
-        </div>
-        <div class="patch" aria-hidden="true">
-          <div><b>U1</b> · 001–016 &nbsp; Wash 16 ch</div>
-          <div><b>U1</b> · 017–037 &nbsp; Spot 21 ch</div>
-          <div><b>U1</b> · 038–058 &nbsp; Spot 21 ch</div>
-          <div><b>U1</b> · 497–512 &nbsp; Wash 16 ch</div>
-          <div class="u2"><b>U2</b> · 001–021 &nbsp; Spot 21 ch ↰</div>
-        </div>
-      </div>
-
-      <p class="intro reveal" style="--d:.18s; margin-top:34px">
-        <strong>La formule vit à un seul endroit</strong>, partagée par la page et par
-        l'application. Une vérification automatique refuse que la page redéfinisse une fonction du
-        module ou réécrive la limite de 512 : c'est le seul moyen d'empêcher les deux calculateurs
-        de diverger.
-      </p>
+    <div class="card reveal">
+      <h3>A fixture’s modes</h3>
+      <p>The same model often exists in 8, 16 or 32 channels. Enter every available mode: the patch will pick the one actually set on the unit.</p>
+      <p class="piege"><strong>The catch</strong> — The channel count depends on the mode, not just on the model. A unit in 16-channel mode addressed at 001 occupies 001 to 016: the next cannot start before 017. A wrongly recorded mode produces a wrong patch with nothing to flag it.</p>
     </div>
-  </section>
 
-  <section id="principes">
-    <div class="wrap">
-      <h2 class="titre reveal">Ce à quoi nous tenons</h2>
-      <p class="intro reveal" style="--d:.06s">
-        Scenika suit les règles de <a href="https://resonlab.github.io">ResonLab</a>, les mêmes que
-        pour Ohmnia et Acustika.
-      </p>
+    <h2 class="titre reveal">2. Take gear out and bring it back</h2>
+    <p class="intro reveal">A rental says who has what, since when, until when. It is also what makes availability real rather than theoretical.</p>
+    <div class="card reveal">
+      <h3>Create a rental</h3>
+      <p>Rentals tab. The customer, the dates, the equipment lines. A rental starts as "planned", becomes "out" when the truck leaves, then "back" on return.</p>
+      <p class="piege"><strong>The catch</strong> — Only rentals that are **out** hold gear. Counting planned ones would make the inventory unavailable as soon as you sketch a quote — and you would stop entering quotes, which defeats the purpose.</p>
+    </div>
+    <div class="card reveal">
+      <h3>Record the returns</h3>
+      <p>On return, enter what comes back, line by line. What is missing stays visible: the screen tells you what never came back, and from whom.</p>
+      <p class="piege"><strong>The catch</strong> — The inventory never moves when gear leaves. It says what you own; what is out is calculated. Decrementing on the way out would be simpler and wrong — one forgotten rental would leave a stock figure nothing puts right, and you could no longer tell theft from breakage from a typing mistake.</p>
+    </div>
 
-      <div class="cards">
-        <div class="card reveal"><span class="num">01</span><h3>Aucune connexion</h3><p>Pas de compte, pas d'abonnement, pas de statistiques d'usage. Votre parc ne quitte pas votre machine.</p></div>
-        <div class="card reveal" style="--d:.06s"><span class="num">02</span><h3>À plusieurs, si vous le choisissez</h3><p>Une société de location a plusieurs personnes qui touchent au même parc. <a href="https://github.com/ResonLab/nexika">Nexika</a> s'installe chez vous — et le mode local reste le défaut.</p></div>
-        <div class="card reveal" style="--d:.12s"><span class="num">03</span><h3>Des messages qui expliquent</h3><p>En français, précis, jamais un message technique brut. Quand le logiciel refuse un patch, il dit lequel chevauche lequel.</p></div>
-        <div class="card reveal" style="--d:.18s"><span class="num">04</span><h3>Rien qu'on ne puisse rouvrir</h3><p>Formats lisibles, code simple, aucun format fermé. Dans dix ans, votre inventaire s'ouvrira encore.</p></div>
-        <div class="card reveal" style="--d:.24s"><span class="num">05</span><h3>Ce qui n'est pas garanti est dit</h3><p>Le calcul de puissance est une aide, pas un contrôle électrique. Ce qui est indicatif est annoncé comme tel.</p></div>
-        <div class="card reveal" style="--d:.30s"><span class="num">06</span><h3>Vérifié, pas affirmé</h3><p>Le calcul DMX est éprouvé par des tests, y compris les trois pièges connus. Une vérification qui échoue vaut mieux qu'une documentation qui ment.</p></div>
-      </div>
+    <h2 class="titre reveal">3. Prepare the power</h2>
+    <p class="intro reveal">Do this before the rig, not during. This is the screen that keeps a breaker from tripping mid-show.</p>
+    <div class="card reveal">
+      <h3>Declare the boards</h3>
+      <p>Boards tab. Each board has a number of circuits and their rating. A 16 A circuit at 230 V holds about 3,600 W in theory, less in practice.</p>
+    </div>
+    <div class="card reveal">
+      <h3>Let Scenika allocate</h3>
+      <p>Power tab. Hungriest first, then into the first circuit that takes it. The rule is simple on purpose: a technician must be able to redo it in their head on site, because it is by hand that they plug in.</p>
+      <p class="piege"><strong>The catch</strong> — A unit hungrier than a whole circuit is refused and named, never forced in. And this calculation is not an electrical inspection: it ignores cable length and section, the state of the board, real simultaneity and inrush current — a discharge lamp can draw several times its rated power while striking, and that is often when a breaker trips.</p>
+    </div>
+
+    <h2 class="titre reveal">4. Address the DMX</h2>
+    <p class="intro reveal">The patch tied to the real inventory: overlaps show before the rig, not during.</p>
+    <div class="card reveal">
+      <h3>Place the fixtures</h3>
+      <p>DMX calculator tab. Pick the item, its mode, its address. The 512-channel map shows the universe at a glance: what is taken, what is left.</p>
+      <p class="piege"><strong>The catch</strong> — A DMX universe holds 512 channels, not 511 and not 513. Beyond that you need a second universe — Scenika says so instead of producing an impossible patch, and offers the last usable address.</p>
+    </div>
+    <div class="card reveal">
+      <h3>The free version</h3>
+      <p>The same calculation exists as a public web page, no sign-up, on the Scenika site. The formula lives in one place: the two cannot diverge.</p>
+    </div>
+
+    <h2 class="titre reveal">5. Invoice, and work as a team</h2>
+    <p class="intro reveal">Two things Scenika does not do alone, and that is deliberate.</p>
+    <div class="card reveal">
+      <h3>Export to Ohmnia</h3>
+      <p>From a rental, Scenika prepares invoice lines — description, quantity, price, inventory reference — for Ohmnia to import.</p>
+      <p class="piege"><strong>The catch</strong> — Scenika does not invoice, and will not. Building a second invoicing module here would mean maintaining VAT and numbering rules twice, in two programs that would eventually disagree.</p>
+    </div>
+    <div class="card reveal">
+      <h3>Multi-workstation mode</h3>
+      <p>A rental company has several people touching the same inventory. Settings → Multi-workstation mode: the machines then talk to a Nexika server you install yourself, on your network.</p>
+      <p class="piege"><strong>The catch</strong> — Local mode stays the default. Without an explicit choice from you, nothing changes and everything works offline. And the server refuses to listen on the network until an administrator exists and encryption is on — otherwise the first passer-by would create their own account and take the inventory.</p>
     </div>
   </section>
 </main>
@@ -436,13 +370,13 @@
 <footer>
   <div class="wrap">
     <div class="famille">
-      <img src="scenika.svg" alt="Scenika" width="28" height="28" />
-      <img src="resonlab.svg" alt="ResonLab" width="28" height="28" />
+      <img src="../scenika.svg" alt="Scenika" width="28" height="28" />
+      <img src="../resonlab.svg" alt="ResonLab" width="28" height="28" />
     </div>
-    <p><strong>Scenika</strong> — une application de <a href="https://resonlab.github.io">ResonLab</a>, Valais, Suisse.</p>
+    <p><strong>Scenika</strong> — an application by <a href="https://resonlab.github.io">ResonLab</a>, Valais, Switzerland.</p>
     <p><a href="mailto:resonlab@proton.me">resonlab@proton.me</a> · <a href="https://github.com/ResonLab/scenika">github.com/ResonLab/scenika</a></p>
-    <p><a href="conditions.html">Conditions d'utilisation</a></p>
-    <p>Logiciel libre, sous licence MIT.</p>
+    <p><a href="terms.html">Terms of use</a></p>
+    <p>Free software, MIT licensed.</p>
   </div>
 </footer>
 
