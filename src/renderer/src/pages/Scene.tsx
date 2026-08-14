@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { proposerPatch, verifierPatch } from '../../../../commun/dmx.js'
+import { doublonsARetirer } from '../../../../commun/doublons.js'
 import { modesDisponibles, type AppareilScene, type Materiel } from '../../../partage/types'
 import { t, traduireErreur } from '../../../partage/i18n'
 import CarteDmx from '../components/CarteDmx'
@@ -130,6 +131,39 @@ export default function Scene(): React.JSX.Element {
     )
   }
 
+  /**
+   * Retire les appareils empilés au même endroit sur la même référence.
+   *
+   * **Répare ce qu'un défaut a laissé.** Le plan posait un nouvel appareil à
+   * chaque fin de glissement ; le défaut est corrigé, mais un correctif
+   * n'efface pas ce qu'il a laissé derrière lui — et retirer cinquante
+   * appareils empilés un par un n'est pas une réparation.
+   *
+   * Le repérage vit dans `commun/doublons.js`, avec les autres calculs : il
+   * doit pouvoir être éprouvé sans base ni fenêtre. Ici on ne fait qu'appeler.
+   * Et on passe par `scene.retirer`, qui existait déjà : pas de canal nouveau
+   * pour une opération qui n'est qu'une suite de suppressions.
+   */
+  async function retirerLesDoublons(): Promise<void> {
+    const aRetirer = doublonsARetirer(poses)
+    if (aRetirer.length === 0) {
+      setMessage(t('scene.aucunDoublon'))
+      return
+    }
+    if (!confirm(t('scene.doublonsConfirme', { nombre: aRetirer.length }))) return
+
+    // Un seul rechargement à la fin : recharger après chaque suppression
+    // ferait clignoter le plan et coûterait autant d'allers-retours.
+    setMessage('')
+    try {
+      for (const id of aRetirer) await window.api.scene.retirer(id)
+      await recharger()
+      setMessage(t('scene.doublonsRetires', { nombre: aRetirer.length }))
+    } catch (e) {
+      setMessage(traduireErreur((e as Error).message))
+    }
+  }
+
   function terminerGlissement(evenement: React.MouseEvent): void {
     const id = glisse.current
     glisse.current = null
@@ -249,6 +283,13 @@ export default function Scene(): React.JSX.Element {
           <div className="barre-boutons">
             <button onClick={adresserAutomatiquement} disabled={poses.length === 0}>
               {t('scene.adresserAuto')}
+            </button>
+            <button
+              className="discret"
+              disabled={poses.length === 0}
+              onClick={retirerLesDoublons}
+            >
+              {t('scene.retirerDoublons')}
             </button>
             <button
               className="discret"

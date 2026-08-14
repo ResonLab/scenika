@@ -128,6 +128,19 @@ const TEXTES = {
     en: 'The plan is empty. Pick a unit on the left and place it.'
   },
   'scene.retirer': { fr: 'Retirer', en: 'Remove' },
+  'scene.retirerDoublons': { fr: 'Retirer les doublons', en: 'Remove duplicates' },
+  'scene.doublonsConfirme': {
+    fr: '{nombre} appareil(s) sont empilés au même endroit sur la même référence. Ne garder que le premier de chaque pile ? Celui qui reste garde ses réglages.',
+    en: '{nombre} unit(s) are stacked at the same spot on the same reference. Keep only the first of each stack? The one kept keeps its settings.'
+  },
+  'scene.aucunDoublon': {
+    fr: 'Aucun doublon : rien n’est empilé au même endroit.',
+    en: 'No duplicates: nothing is stacked at the same spot.'
+  },
+  'scene.doublonsRetires': {
+    fr: '{nombre} doublon(s) retiré(s).',
+    en: '{nombre} duplicate(s) removed.'
+  },
   'scene.vider': { fr: 'Vider le plan', en: 'Clear the plan' },
   'scene.viderConfirme': {
     fr: 'Retirer tous les appareils du plan ? Le parc n’est pas touché.',
