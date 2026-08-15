@@ -29,6 +29,9 @@ const TEXTES = {
   'action.annuler': { fr: 'Annuler', en: 'Cancel' },
   'action.supprimer': { fr: 'Supprimer', en: 'Delete' },
   'action.ajouterMateriel': { fr: '+ Ajouter du matériel', en: '+ Add equipment' },
+  'action.modifier': { fr: 'Modifier', en: 'Edit' },
+  'parc.nouveau': { fr: 'Nouveau matériel', en: 'New equipment' },
+  'parc.corriger': { fr: 'Corriger « {reference} »', en: 'Edit “{reference}”' },
 
   // --- Catégories de matériel ---
   'categorie.son': { fr: 'Son', en: 'Audio' },

@@ -21,6 +21,26 @@ export default function Tableaux(): React.JSX.Element {
   const [poses, setPoses] = useState<AppareilScene[]>([])
   const [message, setMessage] = useState('')
 
+  /**
+   * Le tableau en cours de correction : son identifiant et ce qu'on retouche.
+   *
+   * **`tableaux:modifier` existait de bout en bout sans qu'aucun bouton ne
+   * l'appelle** — trouvé par `tests/atteignable.mjs`. On ne pouvait ni corriger
+   * le nom d'un tableau, ni son disjoncteur de tête, alors que c'est
+   * précisément le chiffre qu'on saisit de travers.
+   *
+   * **Les prises ne sont pas touchées.** Le domaine les réécrit toutes, et le
+   * formulaire d'ajout ne sait produire qu'un calibre uniforme : les rendre
+   * modifiables ici écraserait en silence un tableau de chantier dont une prise
+   * est en 32 A à côté de ses 16 A. Un tableau dont les prises changent est un
+   * autre tableau — on le supprime et on le recrée.
+   */
+  const [correction, setCorrection] = useState<{
+    id: number
+    nom: string
+    calibreGeneralA: number
+  } | null>(null)
+
   const [nom, setNom] = useState('')
   const [nombreDePrises, setNombreDePrises] = useState(6)
   const [calibrePrise, setCalibrePrise] = useState(16)
@@ -154,9 +174,39 @@ export default function Tableaux(): React.JSX.Element {
           calibreGeneralA: tableau.calibreGeneralA,
           prises: tableau.prises.map((p) => ({ numero: p.numero, calibreA: p.calibreA }))
         })
+        const enCorrection = correction?.id === tableau.id
         return (
           <div key={tableau.id} className="carte">
-            <h2>{tableau.nom}</h2>
+            {enCorrection ? (
+              <div className="ligne-champs">
+                <label>
+                  {t('tab.nom')}
+                  <input
+                    value={correction.nom}
+                    onChange={(e) => setCorrection({ ...correction, nom: e.target.value })}
+                    autoFocus
+                  />
+                </label>
+                <label>
+                  {t('tab.calibreGeneral')}
+                  <select
+                    value={correction.calibreGeneralA}
+                    onChange={(e) =>
+                      setCorrection({ ...correction, calibreGeneralA: Number(e.target.value) })
+                    }
+                  >
+                    <option value={0}>{t('tab.generalNonDeclare')}</option>
+                    {[16, 32, 63, 125].map((calibre) => (
+                      <option key={calibre} value={calibre}>
+                        {calibre} A
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            ) : (
+              <h2>{tableau.nom}</h2>
+            )}
             <p className="discret">
               {t('tab.prises', { nombre: tableau.prises.length })} ·{' '}
               {t('tab.calibreGeneral')} :{' '}
@@ -175,6 +225,37 @@ export default function Tableaux(): React.JSX.Element {
             )}
 
             <div className="barre-boutons">
+              {enCorrection ? (
+                <>
+                  <button
+                    onClick={() =>
+                      agir(async () => {
+                        await window.api.tableaux.modifier({ ...tableau, ...correction })
+                        setCorrection(null)
+                      })
+                    }
+                    disabled={!correction.nom.trim()}
+                  >
+                    {t('action.enregistrer')}
+                  </button>
+                  <button className="discret" onClick={() => setCorrection(null)}>
+                    {t('action.annuler')}
+                  </button>
+                </>
+              ) : (
+                <button
+                  className="discret"
+                  onClick={() =>
+                    setCorrection({
+                      id: tableau.id,
+                      nom: tableau.nom,
+                      calibreGeneralA: tableau.calibreGeneralA
+                    })
+                  }
+                >
+                  {t('action.modifier')}
+                </button>
+              )}
               <button
                 className="discret"
                 onClick={() => {

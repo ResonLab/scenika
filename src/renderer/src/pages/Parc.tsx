@@ -20,7 +20,21 @@ const VIDE: Omit<Materiel, 'id'> = {
 export default function Parc(): React.JSX.Element {
   const [materiel, setMateriel] = useState<Materiel[]>([])
   const [resume, setResume] = useState<ResumeParc | null>(null)
-  const [nouveau, setNouveau] = useState<Omit<Materiel, 'id'> | null>(null)
+  /**
+   * Le matériel en cours de saisie — neuf, ou repris pour correction.
+   *
+   * **Un seul formulaire pour les deux, et c'est délibéré.** `parc:modifier`
+   * existait dans le pont, dans l'IPC et dans le domaine, et **aucun bouton ne
+   * l'appelait** : on pouvait ajouter et supprimer, jamais corriger. Une faute
+   * de frappe dans une référence obligeait à supprimer puis re-saisir — donc à
+   * perdre la ligne et tout ce qui la vise. Défaut trouvé par
+   * `tests/atteignable.mjs`, pas à l'œil : le code était correct, les suites
+   * vertes, et la fonction n'existait pas pour l'utilisateur.
+   *
+   * La présence d'un `id` distingue les deux cas. Deux formulaires jumeaux
+   * auraient divergé au premier champ ajouté.
+   */
+  const [saisie, setSaisie] = useState<Materiel | Omit<Materiel, 'id'> | null>(null)
   const [erreur, setErreur] = useState('')
 
   async function recharger(): Promise<void> {
@@ -33,11 +47,12 @@ export default function Parc(): React.JSX.Element {
   }, [])
 
   async function enregistrer(): Promise<void> {
-    if (!nouveau) return
+    if (!saisie) return
     setErreur('')
     try {
-      await window.api.parc.ajouter(nouveau)
-      setNouveau(null)
+      if ('id' in saisie) await window.api.parc.modifier(saisie)
+      else await window.api.parc.ajouter(saisie)
+      setSaisie(null)
       await recharger()
     } catch (e) {
       setErreur(traduireErreur((e as Error).message))
@@ -53,7 +68,7 @@ export default function Parc(): React.JSX.Element {
     cle: K,
     valeur: Omit<Materiel, 'id'>[K]
   ): void {
-    setNouveau((precedent) => (precedent ? { ...precedent, [cle]: valeur } : precedent))
+    setSaisie((precedent) => (precedent ? { ...precedent, [cle]: valeur } : precedent))
   }
 
   return (
@@ -82,16 +97,26 @@ export default function Parc(): React.JSX.Element {
       )}
 
       <div className="carte">
-        {!nouveau && (
-          <button onClick={() => setNouveau({ ...VIDE })}>{t('action.ajouterMateriel')}</button>
+        {!saisie && (
+          <button onClick={() => setSaisie({ ...VIDE })}>{t('action.ajouterMateriel')}</button>
         )}
 
-        {nouveau && (
+        {saisie && (
           <div className="formulaire">
+            {/*
+              Le titre dit ce qu'on est en train de faire. Sans lui, corriger une
+              ligne et en créer une neuve se ressemblent trait pour trait — et on
+              enregistre un doublon en croyant corriger.
+            */}
+            <h2>
+              {'id' in saisie
+                ? t('parc.corriger', { reference: saisie.reference })
+                : t('parc.nouveau')}
+            </h2>
             <label>
               {t('parc.reference')}
               <input
-                value={nouveau.reference}
+                value={saisie.reference}
                 onChange={(e) => champ('reference', e.target.value)}
                 autoFocus
               />
@@ -99,14 +124,14 @@ export default function Parc(): React.JSX.Element {
             <label>
               {t('parc.designation')}
               <input
-                value={nouveau.designation}
+                value={saisie.designation}
                 onChange={(e) => champ('designation', e.target.value)}
               />
             </label>
             <label>
               {t('parc.categorie')}
               <select
-                value={nouveau.categorie}
+                value={saisie.categorie}
                 onChange={(e) => champ('categorie', e.target.value as Materiel['categorie'])}
               >
                 {CATEGORIES.map((c) => (
@@ -121,7 +146,7 @@ export default function Parc(): React.JSX.Element {
               <input
                 type="number"
                 min="0"
-                value={nouveau.quantite}
+                value={saisie.quantite}
                 onChange={(e) => champ('quantite', Number(e.target.value))}
               />
             </label>
@@ -130,7 +155,7 @@ export default function Parc(): React.JSX.Element {
               <input
                 type="number"
                 min="0"
-                value={nouveau.puissanceW}
+                value={saisie.puissanceW}
                 onChange={(e) => champ('puissanceW', Number(e.target.value))}
               />
             </label>
@@ -140,7 +165,7 @@ export default function Parc(): React.JSX.Element {
                 type="number"
                 min="0"
                 max="512"
-                value={nouveau.canauxDmx}
+                value={saisie.canauxDmx}
                 onChange={(e) => champ('canauxDmx', Number(e.target.value))}
               />
             </label>
@@ -148,14 +173,14 @@ export default function Parc(): React.JSX.Element {
               {t('parc.modesDmx')}
               <input
                 placeholder="8,12,16"
-                value={nouveau.modesDmx}
+                value={saisie.modesDmx}
                 onChange={(e) => champ('modesDmx', e.target.value)}
               />
             </label>
             <label>
               {t('parc.emplacement')}
               <input
-                value={nouveau.emplacement}
+                value={saisie.emplacement}
                 onChange={(e) => champ('emplacement', e.target.value)}
               />
             </label>
@@ -164,7 +189,7 @@ export default function Parc(): React.JSX.Element {
 
             <div className="barre-boutons">
               <button onClick={enregistrer}>{t('action.enregistrer')}</button>
-              <button className="discret" onClick={() => setNouveau(null)}>
+              <button className="discret" onClick={() => setSaisie(null)}>
                 {t('action.annuler')}
               </button>
             </div>
@@ -197,6 +222,9 @@ export default function Parc(): React.JSX.Element {
                 <td>{m.canauxDmx > 0 ? `${m.canauxDmx} ${t('parc.canaux')}` : '—'}</td>
                 <td>{m.emplacement || '—'}</td>
                 <td>
+                  <button className="discret" onClick={() => setSaisie({ ...m })}>
+                    {t('action.modifier')}
+                  </button>{' '}
                   <button className="discret" onClick={() => supprimer(m.id)}>
                     {t('action.supprimer')}
                   </button>

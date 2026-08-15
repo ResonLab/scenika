@@ -48,14 +48,6 @@ body {
 /* Le carre de couleur qui tenait lieu de logo dans le menu a ete remplace par
    la marque elle-meme — voir components/LogoScenika.tsx. La regle reste : la
    pastille sert encore ailleurs comme reperage de couleur. */
-.pastille {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, var(--ambre), var(--orange));
-  flex: none;
-}
-
 .menu-entete svg {
   flex: none;
 }
@@ -508,4 +500,67 @@ button.discret {
 .suite-ecarts span.rompu {
   border-color: #ff6b5e;
   opacity: 1;
+}
+
+/* ── Ce que le contrôle d'atteignabilité a trouvé ─────────────────────────
+   Six classes étaient posées sur des éléments sans qu'aucune règle ne les
+   vise : elles existaient dans le code et ne se voyaient pas à l'écran.
+   Trois d'entre elles portent des alertes — un chevauchement DMX, une
+   surcharge de circuit, du matériel manquant au retour — et sortaient donc
+   dans la couleur du texte courant, au milieu du reste.
+   Trouvées par `tests/atteignable.mjs`, pas à l'œil. */
+
+/* Le pied du menu : le choix de langue, séparé de la navigation. */
+.menu-pied {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--trait);
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+/* Le cadre de la carte des 512 canaux. Sa légende avait déjà ses règles ; le
+   conteneur, non — le tableau flottait sans rien pour le délimiter. */
+.carte-dmx {
+  border: 1px solid var(--trait);
+  border-radius: 8px;
+  padding: 0.8rem;
+  margin: 0.6rem 0;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* **Un texte d'alerte doit se voir sans être cherché.** C'est lui qui annonce
+   deux appareils sur le même canal DMX et un circuit en surcharge. */
+.texte-alerte {
+  color: var(--rouge);
+  font-weight: 600;
+}
+
+/* Une ligne de champs dans le calculateur : même disposition que
+   `.ligne-champs`, dont elle est le doublon de nom. */
+.ligne-formulaire {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-bottom: 0.8rem;
+}
+
+/* Une ligne de tableau en alerte : plus de matériel sorti que possédé. Le fond
+   teinte la ligne entière, parce que c'est la ligne qui est fausse. */
+tr.alerte td {
+  background: rgba(255, 107, 94, 0.12);
+}
+
+/* Ce qui manque au retour d'une location. */
+.badge-alerte {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(255, 107, 94, 0.15);
+  color: var(--rouge);
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
