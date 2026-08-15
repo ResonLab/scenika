@@ -3,6 +3,7 @@ import { definirContexte } from '../main/contexte'
 import { fermerBaseDeDonnees, ouvrirBaseDeDonnees } from '../main/db/database'
 import { REGISTRE } from './registre'
 import { roleExige } from './droits'
+import { PAGE_MOBILE } from './pageMobile'
 
 /**
  * Scenika, telle que le serveur commun la voit.
@@ -23,7 +24,15 @@ export const APPLICATION_SCENIKA: ApplicationServie = {
     definirContexte({ dossierDonnees, version })
     ouvrirBaseDeDonnees()
   },
-  fermerBase: fermerBaseDeDonnees
+  fermerBase: fermerBaseDeDonnees,
+  /**
+   * La consultation mobile, servie sur la racine du serveur.
+   *
+   * Elle n'ouvre aucun accès : c'est un document statique qui passe par
+   * `session:ouvrir` et par les mêmes canaux que n'importe quel poste. Voir
+   * `pageMobile.ts` pour ce qu'elle fait et ce qu'elle refuse de faire.
+   */
+  pageMobile: PAGE_MOBILE
 }
 
 export function demarrerServeurScenika(
