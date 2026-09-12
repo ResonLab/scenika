@@ -377,6 +377,166 @@
         max-width: 980px; margin: 18px auto 0; padding: 0 20px;
         font-size: 14px; }
       .langues a { font-variant: small-caps; letter-spacing: .04em; color: #7fb2e8; text-decoration: underline; text-underline-offset: 2px; }
+
+      /* ── En-tête de page et réglages ──────────────────────────────────── */
+      .entete-page {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+
+      /* ── Adresse ancrée, dans le tableau du patch ─────────────────────── */
+      td.cellule-adresse {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        white-space: nowrap;
+      }
+
+      td.cellule-adresse input {
+        width: 4.2rem;
+        min-width: 0;
+        font-variant-numeric: tabular-nums;
+        padding: 0.3rem 0.4rem;
+      }
+
+      /* Une adresse ancrée porte sa propre couleur, comme un choix explicite
+         plutôt qu'un résultat de calcul. */
+      td.cellule-adresse input.ancree {
+        border-color: var(--ambre);
+        color: var(--ambre);
+      }
+
+      .liberer {
+        background: transparent;
+        border: 1px solid var(--trait);
+        color: var(--discret);
+        font-size: 0.75rem;
+        font-weight: 500;
+        padding: 0.2rem 0.5rem;
+        box-shadow: none;
+      }
+
+      .liberer:hover {
+        filter: none;
+        border-color: var(--ambre);
+        color: var(--texte);
+        background: rgba(255, 201, 97, 0.07);
+        box-shadow: none;
+      }
+
+      /* ── Aperçu de la feuille, et réglages de personnalisation ────────── */
+      .apercu-feuille {
+        border: 1px solid var(--trait);
+        border-radius: 6px;
+        padding: 1rem 1.2rem;
+        background: #100e0a;
+      }
+
+      .apercu-entete {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        margin-bottom: 0.6rem;
+      }
+
+      .apercu-entete img {
+        max-height: 34px;
+        max-width: 120px;
+        display: block;
+      }
+
+      .apercu-entete strong {
+        font-size: 1.05rem;
+      }
+
+      .apercu-pied {
+        margin-top: 0.8rem;
+        padding-top: 0.6rem;
+        border-top: 1px solid var(--trait);
+        color: var(--discret);
+        font-size: 0.85rem;
+        white-space: pre-line;
+      }
+
+      dialog#reglages {
+        background: var(--carte);
+        color: var(--texte);
+        border: 1px solid var(--trait);
+        border-radius: 8px;
+        padding: 1.3rem 1.4rem;
+        max-width: 26rem;
+        width: calc(100% - 2rem);
+      }
+
+      dialog#reglages::backdrop {
+        background: rgba(0, 0, 0, 0.55);
+      }
+
+      dialog#reglages form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.9rem;
+      }
+
+      dialog#reglages label {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        font-size: 0.85rem;
+        color: var(--discret);
+      }
+
+      dialog#reglages textarea {
+        background: #100e0a;
+        border: 1px solid var(--trait);
+        border-radius: 6px;
+        color: var(--texte);
+        padding: 0.5rem 0.6rem;
+        font: inherit;
+        resize: vertical;
+        min-height: 4.5rem;
+      }
+
+      .actions-reglages {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.6rem;
+        margin-top: 0.4rem;
+      }
+
+      /* ── La feuille de patch imprimée ──────────────────────────────────
+         Cachée à l'écran : l'aperçu ci-dessus montre déjà le même contenu,
+         calculé par la même fonction. Deux endroits qui dessinent la même
+         feuille finiraient par ne plus se ressembler. */
+      .feuille-impression {
+        display: none;
+      }
+
+      @media print {
+        body > *:not(.feuille-impression) {
+          display: none !important;
+        }
+        .feuille-impression {
+          display: block !important;
+          color: #000;
+        }
+        .feuille-impression table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+        .feuille-impression th,
+        .feuille-impression td {
+          border-bottom: 1px solid #999;
+          padding: 0.3rem 0.5rem;
+          text-align: left;
+        }
+        .feuille-impression img {
+          max-height: 40px;
+        }
+      }
     </style>
   </head>
   <body>
@@ -385,7 +545,12 @@
       <a href="./">Scenika</a>
     </nav>
     <main>
-      <h1>Calculateur DMX</h1>
+      <div class="entete-page">
+        <div>
+          <h1>Calculateur DMX</h1>
+        </div>
+        <button type="button" class="discret" id="ouvrirReglages">Personnaliser la feuille</button>
+      </div>
       <p class="sous-titre">
         Adresses, univers, chevauchements. Gratuit, sans compte —
         <strong>rien n'est enregistré</strong>&nbsp;: tout se calcule dans votre navigateur.
@@ -440,6 +605,12 @@
       <section class="carte">
         <h2>Patch proposé</h2>
         <div id="messages"></div>
+        <p class="sous-titre">
+          Le patch chaîne chaque appareil à la suite du précédent. Pour ancrer un
+          appareil à une adresse précise sans déplacer ce qui est déjà posé avant
+          lui, changez son adresse dans le tableau&nbsp;: la suite reprend le
+          chaînage juste après elle.
+        </p>
         <div class="defilable">
           <table>
             <thead>
@@ -487,20 +658,62 @@
         <div id="libres" class="vide">—</div>
       </section>
 
+      <section class="carte">
+        <h2>La feuille de patch</h2>
+        <p class="sous-titre">
+          Ce que le bouton imprime, tel quel. Le nom, le logo et les coordonnées
+          viennent des réglages ci-dessus (« Personnaliser la feuille ») —
+          laissés vides, seule l'en-tête d'Adresso apparaît.
+        </p>
+        <div class="apercu-feuille" id="apercu"></div>
+        <p class="sous-titre" style="margin-top: 0.9rem;">
+          <button type="button" id="imprimer">Imprimer la feuille de patch</button>
+        </p>
+      </section>
+
       <footer>
         <p>
           <strong>Adresso</strong>, le calculateur DMX de
-          <strong>Scenika</strong>. Cette page fait un calcul, parfaitement, et ne retient rien.
+          <strong>Scenika</strong>. Cette page fait un calcul, parfaitement, et ne retient rien
+          — sauf le nom, le logo et les coordonnées de la feuille, gardés uniquement
+          dans votre navigateur pour vous éviter de les retaper.
         </p>
         <p>
           L'application Scenika va plus loin&nbsp;: elle relie le patch à votre parc réel —
-          puissance des circuits, feuille de patch imprimable, patch mémorisé.
+          puissance des circuits, patch mémorisé d'un projet à l'autre.
         </p>
         <p>
           Un univers DMX porte 512 canaux. Un appareil en mode 16 canaux adressé en 001 occupe
           001 à 016&nbsp;: le suivant commence à 017.
         </p>
       </footer>
+
+      <dialog id="reglages">
+        <form id="formulaireReglages">
+          <h2 style="margin: 0;">Personnaliser la feuille</h2>
+          <label>
+            Nom affiché en haut de la feuille
+            <input id="reglageNom" type="text" placeholder="Votre société" maxlength="80" />
+          </label>
+          <label>
+            Logo (image, affiché à côté du nom)
+            <input id="reglageLogo" type="file" accept="image/*" />
+          </label>
+          <label>
+            Coordonnées affichées en bas de la feuille
+            <textarea id="reglageCoordonnees" placeholder="Téléphone, e-mail, adresse…"></textarea>
+          </label>
+          <div class="actions-reglages">
+            <button type="button" class="discret" id="effacerReglages">Retirer le logo et les textes</button>
+            <span style="display: flex; gap: 0.5rem;">
+              <button type="button" class="discret" id="fermerReglages">Fermer</button>
+              <button type="submit">Enregistrer</button>
+            </span>
+          </div>
+        </form>
+      </dialog>
+
+      <div class="feuille-impression" id="feuilleImpression"></div>
     </main>
 
     <script type="module">
@@ -518,7 +731,7 @@
         verifierPatch
       } from './commun/dmx.js'
 
-      /** @type {{ nom: string, canaux: number }[]} */
+      /** @type {{ nom: string, canaux: number, univers?: number, adresse?: number }[]} */
       let appareils = []
 
       const $ = (id) => document.getElementById(id)
@@ -596,6 +809,7 @@
           $('cartes').className = 'vide'
           $('ecarts').textContent = '—'
           $('ecarts').className = 'vide'
+          dessinerFeuille([])
           return
         }
 
@@ -615,6 +829,7 @@
           $('cartes').className = 'vide'
           $('ecarts').textContent = '—'
           $('ecarts').className = 'vide'
+          dessinerFeuille([])
           return
         }
 
@@ -631,21 +846,61 @@
           }
         }
 
-        for (const appareil of patch) {
+        patch.forEach((appareil, index) => {
           const plage = plageOccupee(appareil)
           const ligne = document.createElement('tr')
           if (enCause.has(appareil.nom)) ligne.className = 'en-cause'
-          for (const valeur of [
-            appareil.nom,
-            appareil.canaux,
-            appareil.univers,
-            String(appareil.adresse).padStart(3, '0'),
-            `${String(plage.premier).padStart(3, '0')} – ${String(plage.dernier).padStart(3, '0')}`
-          ]) {
+
+          for (const valeur of [appareil.nom, appareil.canaux, appareil.univers]) {
             const cellule = document.createElement('td')
             cellule.textContent = String(valeur)
             ligne.append(cellule)
           }
+
+          // L'adresse se modifie ici même : c'est l'ancre décrite au-dessus du
+          // tableau. On édite l'appareil source par son index, pas par son nom
+          // — deux appareils ajoutés en quantité partagent parfois un nom.
+          const celluleAdresse = document.createElement('td')
+          celluleAdresse.className = 'cellule-adresse'
+          const champAdresse = document.createElement('input')
+          champAdresse.type = 'number'
+          champAdresse.min = '1'
+          champAdresse.max = String(CANAUX_PAR_UNIVERS)
+          champAdresse.value = String(appareil.adresse)
+          const estAncree = Number.isInteger(appareils[index].adresse)
+          champAdresse.className = estAncree ? 'ancree' : ''
+          champAdresse.title = estAncree
+            ? 'Adresse ancrée : elle ne bouge plus, quoi qu\'il arrive avant elle.'
+            : 'Adresse calculée automatiquement par le chaînage.'
+          champAdresse.addEventListener('change', () => {
+            const valeur = Number(champAdresse.value)
+            if (Number.isInteger(valeur) && valeur >= 1) {
+              appareils[index].adresse = valeur
+            } else {
+              delete appareils[index].adresse
+            }
+            afficher()
+          })
+          celluleAdresse.append(champAdresse)
+
+          if (estAncree) {
+            const liberer = document.createElement('button')
+            liberer.type = 'button'
+            liberer.className = 'liberer'
+            liberer.textContent = 'Libérer'
+            liberer.title = 'Revenir au chaînage automatique pour cet appareil.'
+            liberer.addEventListener('click', () => {
+              delete appareils[index].adresse
+              afficher()
+            })
+            celluleAdresse.append(liberer)
+          }
+          ligne.append(celluleAdresse)
+
+          const occupe = document.createElement('td')
+          occupe.textContent =
+            `${String(plage.premier).padStart(3, '0')} – ${String(plage.dernier).padStart(3, '0')}`
+          ligne.append(occupe)
 
           const actions = document.createElement('td')
           const retirer = document.createElement('button')
@@ -653,18 +908,19 @@
           retirer.type = 'button'
           retirer.textContent = 'Retirer'
           retirer.addEventListener('click', () => {
-            appareils = appareils.filter((a) => a.nom !== appareil.nom)
+            appareils.splice(index, 1)
             afficher()
           })
           actions.append(retirer)
           ligne.append(actions)
           lignes.append(ligne)
-        }
+        })
 
         const universUtilises = [...new Set(patch.map((a) => a.univers))].sort((a, b) => a - b)
 
         dessinerEcarts(patch)
         dessinerCartes(patch, universUtilises)
+        dessinerFeuille(patch)
 
         $('libres').textContent = universUtilises
           .map((univers) => {
@@ -808,6 +1064,151 @@
         element.textContent = texte
         return element
       }
+
+      /**
+       * La personnalisation de la feuille : nom, logo, coordonnées.
+       *
+       * **Rien de tout ceci ne quitte le navigateur.** C'est un réglage de
+       * présentation, gardé dans `localStorage` pour éviter de le retaper à
+       * chaque visite — pas une donnée du patch, qui reste, elle, jamais
+       * enregistrée. Un logo abîmé ou une clé absente ne doit jamais faire
+       * échouer la page : on retombe silencieusement sur l'en-tête d'Adresso.
+       */
+      const CLE_REGLAGES = 'adresso.feuille'
+
+      function chargerReglages() {
+        try {
+          const brut = localStorage.getItem(CLE_REGLAGES)
+          return brut ? JSON.parse(brut) : {}
+        } catch (e) {
+          return {}
+        }
+      }
+
+      function enregistrerReglages(reglages) {
+        try {
+          localStorage.setItem(CLE_REGLAGES, JSON.stringify(reglages))
+        } catch (e) {
+          // Navigation privée, quota dépassé : la feuille garde l'en-tête
+          // d'Adresso pour cette visite, ce n'est pas une erreur à remonter.
+        }
+      }
+
+      /**
+       * Dessine la feuille de patch — l'aperçu à l'écran et la version
+       * imprimée, **par la même fonction**. Deux endroits qui dessinent la
+       * même feuille finiraient par ne plus se ressembler.
+       */
+      function dessinerFeuille(patch) {
+        const reglages = chargerReglages()
+
+        for (const cible of [$('apercu'), $('feuilleImpression')]) {
+          cible.textContent = ''
+
+          const entete = document.createElement('div')
+          entete.className = 'apercu-entete'
+          if (reglages.logo) {
+            const img = document.createElement('img')
+            img.src = reglages.logo
+            img.alt = reglages.nom ? `Logo ${reglages.nom}` : 'Logo'
+            entete.append(img)
+          }
+          const nom = document.createElement('strong')
+          nom.textContent = reglages.nom || 'Adresso — Scenika'
+          entete.append(nom)
+          cible.append(entete)
+
+          const table = document.createElement('table')
+          const entetes = document.createElement('tr')
+          for (const titre of ['Appareil', 'Canaux', 'Univers', 'Adresse']) {
+            const th = document.createElement('th')
+            th.textContent = titre
+            entetes.append(th)
+          }
+          table.append(entetes)
+
+          for (const appareil of patch) {
+            const ligne = document.createElement('tr')
+            for (const valeur of [
+              appareil.nom,
+              appareil.canaux,
+              appareil.univers,
+              String(appareil.adresse).padStart(3, '0')
+            ]) {
+              const td = document.createElement('td')
+              td.textContent = String(valeur)
+              ligne.append(td)
+            }
+            table.append(ligne)
+          }
+          cible.append(table)
+
+          if (patch.length === 0) {
+            const vide = document.createElement('p')
+            vide.className = 'vide'
+            vide.textContent = 'Ajoutez un appareil pour voir la feuille.'
+            cible.append(vide)
+          }
+
+          if (reglages.coordonnees) {
+            const pied = document.createElement('div')
+            pied.className = 'apercu-pied'
+            pied.textContent = reglages.coordonnees
+            cible.append(pied)
+          }
+        }
+      }
+
+      $('ouvrirReglages').addEventListener('click', () => {
+        const reglages = chargerReglages()
+        $('reglageNom').value = reglages.nom || ''
+        $('reglageCoordonnees').value = reglages.coordonnees || ''
+        $('reglages').showModal()
+      })
+
+      $('fermerReglages').addEventListener('click', () => $('reglages').close())
+
+      $('formulaireReglages').addEventListener('submit', (evenement) => {
+        evenement.preventDefault()
+        const reglages = chargerReglages()
+        reglages.nom = $('reglageNom').value.trim()
+        reglages.coordonnees = $('reglageCoordonnees').value.trim()
+
+        const fichier = $('reglageLogo').files[0]
+        if (!fichier) {
+          enregistrerReglages(reglages)
+          $('reglages').close()
+          afficher()
+          return
+        }
+
+        // Le logo est gardé en donnée locale (base64) : comme le reste de ces
+        // réglages, il ne part jamais vers un serveur.
+        const lecteur = new FileReader()
+        lecteur.onload = () => {
+          reglages.logo = String(lecteur.result)
+          enregistrerReglages(reglages)
+          $('reglageLogo').value = ''
+          $('reglages').close()
+          afficher()
+        }
+        lecteur.readAsDataURL(fichier)
+      })
+
+      $('effacerReglages').addEventListener('click', () => {
+        try {
+          localStorage.removeItem(CLE_REGLAGES)
+        } catch (e) {
+          /* rien à effacer si le stockage n'a jamais fonctionné */
+        }
+        $('reglageNom').value = ''
+        $('reglageCoordonnees').value = ''
+        $('reglageLogo').value = ''
+        $('reglages').close()
+        afficher()
+      })
+
+      $('imprimer').addEventListener('click', () => window.print())
 
       remplirChoixUnivers()
       afficher()

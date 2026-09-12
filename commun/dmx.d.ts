@@ -41,7 +41,7 @@ export interface Probleme {
 export function plageOccupee(appareil: Appareil): Plage
 export function verifierPatch(appareils: Appareil[]): Probleme[]
 export function proposerPatch(
-  appareils: { nom: string; canaux: number; univers?: number }[],
+  appareils: { nom: string; canaux: number; univers?: number; adresse?: number }[],
   premierUnivers?: number,
   premiereAdresse?: number
 ): Appareil[]

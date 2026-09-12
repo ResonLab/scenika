@@ -374,6 +374,60 @@ verifier('un univers impose et plein est refuse, pas deplace en silence', (() =>
   }
 })())
 
+// L'adresse ancree : le mode "suivre" par defaut chaine chaque appareil a la
+// suite du precedent. Ancrer une adresse au milieu de la liste ne deplace pas
+// ce qui est deja pose avant elle, et le chainage reprend juste apres pour
+// la suite.
+const ancre = proposerPatch([
+  { nom: 'A', canaux: 8 },
+  { nom: 'B', canaux: 8, adresse: 34 },
+  { nom: 'C', canaux: 8 }
+])
+verifier(
+  'un appareil sans ancre suit le chainage normal',
+  ancre[0].adresse === 1 && ancre[0].univers === 1,
+  JSON.stringify(ancre[0])
+)
+verifier(
+  'une adresse ancree est respectee telle quelle',
+  ancre[1].adresse === 34 && ancre[1].univers === 1,
+  JSON.stringify(ancre[1])
+)
+verifier(
+  'le chainage reprend juste apres l ancre pour la suite',
+  ancre[2].adresse === 42 && ancre[2].univers === 1,
+  JSON.stringify(ancre[2])
+)
+
+verifier('une ancre qui deborde de l univers est refusee et nommee', (() => {
+  try {
+    proposerPatch([{ nom: 'Trop haut', canaux: 20, adresse: 500 }])
+    return false
+  } catch (erreur) {
+    return erreur.message.includes('Trop haut') && erreur.message.includes('500') &&
+      erreur.message.includes('512')
+  }
+})())
+
+// Une ancre qui recule sur du deja-pose n'est pas corrigee en silence : c'est
+// verifierPatch qui la signale, exactement comme n'importe quel autre
+// chevauchement. Inventer une correction ici donnerait un patch juste sur le
+// papier et faux au bout du cable.
+const ancreEnArriere = proposerPatch([
+  { nom: 'Gros', canaux: 40 },
+  { nom: 'Recule', canaux: 8, adresse: 10 }
+])
+verifier(
+  'une ancre qui recule sur du deja pose cree un chevauchement signale',
+  verifierPatch(ancreEnArriere).some((p) => p.code === 'chevauchement'),
+  JSON.stringify(verifierPatch(ancreEnArriere))
+)
+
+verifier('une ancre d adresse et un univers impose se combinent', (() => {
+  const patch = proposerPatch([{ nom: 'Sur univers 3', canaux: 8, univers: 3, adresse: 100 }])
+  return patch[0].univers === 3 && patch[0].adresse === 100
+})())
+
 // Les ecarts : ce qu on tape dans une console.
 const serie = proposerPatch([
   { nom: 'L1', canaux: 16 },

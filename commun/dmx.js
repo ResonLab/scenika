@@ -210,11 +210,19 @@ export function verifierPatch(appareils) {
  * lyres sur l'univers 2, quoi qu'il arrive » — une décision de câblage, que le
  * calcul n'a pas à défaire.
  *
+ * Un appareil peut aussi porter une `adresse` : il y est alors **ancré**. Ce
+ * qui est déjà posé avant lui dans la liste ne bouge pas, et le chaînage
+ * automatique reprend juste après lui pour la suite — c'est ce qui permet de
+ * dire « celui-là commence à 34, quoi qu'il arrive », sans recalculer toute
+ * la liste à la main. Une ancre qui recule sur du déjà-posé n'est pas
+ * corrigée en silence : `verifierPatch` la signale comme n'importe quel autre
+ * chevauchement, exactement comme pour un univers imposé qui collisionne.
+ *
  * Chaque univers garde son propre curseur. Sans cela, épingler un appareil sur
  * l'univers 2 puis revenir au 1 réécrirait par-dessus ce qu'on venait d'y poser.
  */
 /**
- * @param {{ nom: string, canaux: number, univers?: number }[]} appareils
+ * @param {{ nom: string, canaux: number, univers?: number, adresse?: number }[]} appareils
  * @param {number} [premierUnivers]
  * @param {number} [premiereAdresse]
  * @returns {Appareil[]}
@@ -250,16 +258,25 @@ export function proposerPatch(appareils, premierUnivers = 1, premiereAdresse = 1
       )
     }
 
-    const impose = Number.isInteger(appareil.univers) && Number(appareil.univers) >= 1
-    let univers = impose ? Number(appareil.univers) : universCourant
-    let prochaine = curseur(univers)
+    const imposeUnivers = Number.isInteger(appareil.univers) && Number(appareil.univers) >= 1
+    const imposeAdresse = Number.isInteger(appareil.adresse) && Number(appareil.adresse) >= 1
+    let univers = imposeUnivers ? Number(appareil.univers) : universCourant
+    let prochaine = imposeAdresse ? Number(appareil.adresse) : curseur(univers)
 
     if (prochaine + appareil.canaux - 1 > CANAUX_PAR_UNIVERS) {
-      if (impose) {
-        // Un univers imposé et plein : on le dit, on ne déplace pas l'appareil
-        // ailleurs en silence. Le technicien a demandé cet univers-là, et le
-        // déplacer sans rien dire donnerait un patch juste sur le papier et faux
-        // au bout du câble.
+      if (imposeAdresse) {
+        // Une adresse ancrée et qui déborde : on le dit, on ne la déplace pas
+        // en silence. L'ancre est une décision explicite du technicien, et la
+        // déplacer sans rien dire donnerait un patch juste sur le papier et
+        // faux au bout du câble.
+        throw new Error(
+          `« ${appareil.nom} » ancré à l'adresse ${prochaine} ne tient pas dans l'univers ` +
+            `${univers} : ${appareil.canaux} canaux dépasseraient la fin de l'univers ` +
+            `(${prochaine + appareil.canaux - 1} > ${CANAUX_PAR_UNIVERS}).`
+        )
+      }
+      if (imposeUnivers) {
+        // Un univers imposé et plein : même règle, même raison.
         throw new Error(
           `« ${appareil.nom} » ne tient plus dans l'univers ${univers} : il n'y reste pas ` +
             `${appareil.canaux} canaux d'affilée à partir de ${prochaine}.`
