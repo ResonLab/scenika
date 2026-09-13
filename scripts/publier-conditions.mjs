@@ -105,8 +105,8 @@ ${section.paragraphes
     <p class="etat-ligne">${fr ? 'VERSION' : 'VERSION'} ${conditions.version}</p>
     <h1>${
       fr
-        ? 'Conditions <span class="grad-text">d\'utilisation</span>.'
-        : 'Terms <span class="grad-text">of use</span>.'
+        ? 'Conditions d\'utilisation.'
+        : 'Terms of use.'
     }</h1>
     <p class="chapo">${echapper(fr ? conditions.resume.fr : conditions.resume.en)}</p>
     <p class="chapo">${

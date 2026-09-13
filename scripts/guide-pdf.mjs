@@ -41,13 +41,12 @@ const PAGES = [
 const STYLE_PDF = `
   :root { color-scheme: light; }
   html { --bg: #fff; --bg-2: #fff; --card: #fff; --fg: #111; --fg-dim: #333;
-         --fg-faint: #555; --border: #bbb; --stripe: #f2f2f2; --aurora-op: 0; }
+         --fg-faint: #555; --border: #bbb; --stripe: #f2f2f2; }
   body { background: #fff !important; color: #111 !important; }
-  header, footer, .aurora, .progres, .btn { display: none !important; }
+  header, footer, .btn { display: none !important; }
   .js .reveal { opacity: 1 !important; transform: none !important; }
   .card { break-inside: avoid; border: 1px solid #ccc; background: #fff; }
   .hero { padding-top: 0; }
-  .grad-text { color: #F2751A !important; -webkit-text-fill-color: #F2751A !important; }
   .piege { border-left: 3px solid #F2751A; color: #333; }
 `
 
