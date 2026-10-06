@@ -322,7 +322,7 @@
       tout seul.
     </p>
     <div class="actions">
-      <a class="btn" href="https://github.com/ResonLab/scenika/releases/latest">Télécharger — Windows et Linux</a>
+      <a class="btn" data-telechargement="auto" href="https://github.com/ResonLab/scenika/releases/latest">Télécharger — Windows et Linux</a>
       <a class="btn btn-ghost" href="calculateur-dmx.html">Calculateur DMX gratuit</a>
       <a class="btn btn-ghost" href="#modules">Ce qu'elle fait</a>
     </div>
@@ -507,6 +507,34 @@
   }, { passive: true });
 
   surDefilement();
+})();
+</script>
+<script>
+(function () {
+  // Direct download: the link goes straight to the installer for the visitor's
+  // system. Without JavaScript, or if GitHub's API refuses, it keeps pointing
+  // at the releases page. No version number is written here: it comes from the API.
+  var liens = document.querySelectorAll('[data-telechargement]');
+  if (!liens.length || !window.fetch) return;
+  var agent = navigator.userAgent || '';
+  var systeme = /Windows/i.test(agent) ? 'windows'
+    : (/Linux/i.test(agent) && !/Android/i.test(agent)) ? 'linux' : null;
+  fetch('https://api.github.com/repos/ResonLab/scenika/releases/latest')
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json() })
+    .then(function (pub) {
+      function fichier(motif) {
+        for (var i = 0; i < pub.assets.length; i++) if (motif.test(pub.assets[i].name)) return pub.assets[i];
+        return null;
+      }
+      for (var k = 0; k < liens.length; k++) {
+        var cible = liens[k].getAttribute('data-telechargement');
+        if (cible === 'auto') cible = systeme;
+        if (!cible) continue;
+        var f = fichier(cible === 'windows' ? /\.exe$/i : /\.AppImage$/i);
+        if (f) { liens[k].href = f.browser_download_url; liens[k].setAttribute('download', f.name); }
+      }
+    })
+    .catch(function () {});
 })();
 </script>
 </body>
